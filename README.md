@@ -25,4 +25,4 @@
 #### Finally
 `go run main.go`
 
-By default the server runs on 8013 port
+By default the server runs on 8080 port
