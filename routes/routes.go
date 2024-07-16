@@ -24,10 +24,10 @@ func routes(echo *echo.Echo) {
 
 	//Depoimentos
 	open.GET("/depoimentos", controllers.IndexTestimonies)
-	echo.GET("/depoimentos/:id", placeHolderEcho)
-	echo.POST("/depoimentos", controllers.StoreTestimony)
-	echo.PATCH("/depoimentos/:id", placeHolderEcho)  //Change to authenticated
-	echo.DELETE("/depoimentos/:id", placeHolderEcho) //Change to authenticated
+	open.GET("/depoimentos/:id", controllers.ShowTestimony)
+	open.POST("/depoimentos", controllers.StoreTestimony)
+	open.PATCH("/depoimentos/:id", placeHolderEcho)  //Change to authenticated
+	open.DELETE("/depoimentos/:id", placeHolderEcho) //Change to authenticated
 }
 
 func placeHolderEcho(c echo.Context) error {
