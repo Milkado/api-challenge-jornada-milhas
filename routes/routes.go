@@ -22,12 +22,20 @@ func routes(echo *echo.Echo) {
 
 	open := echo.Group("api")
 
+	//Auth
+	open.POST("/login", controllers.Login)
+
 	//Depoimentos
 	open.GET("/depoimentos", controllers.IndexTestimonies)
 	open.GET("/depoimentos/:id", controllers.ShowTestimony)
 	open.POST("/depoimentos", controllers.StoreTestimony)
 	open.PATCH("/depoimentos/:id", placeHolderEcho)  //Change to authenticated
 	open.DELETE("/depoimentos/:id", placeHolderEcho) //Change to authenticated
+
+	//User
+	open.POST("/request-new-password", controllers.RequestNewPassword)
+	open.PATCH("/create-password/:token", controllers.StorePassword)
+
 }
 
 func placeHolderEcho(c echo.Context) error {

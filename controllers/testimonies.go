@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"net/http"
 	"strconv"
 	"time"
@@ -31,8 +30,6 @@ type (
 	}
 )
 
-var ctx = context.Background()
-
 func IndexTestimonies(c echo.Context) error {
 	client := database.ConnectDB()
 	testimonies, err := client.Testimonies.Query().All(ctx)
@@ -48,10 +45,10 @@ func StoreTestimony(c echo.Context) error {
 
 	client := database.ConnectDB()
 
-	if err := helpers.WithTx(ctx, client, func(tx *ent.Tx) error {
+	if err := withTx(ctx, client, func(tx *ent.Tx) error {
 		t := new(Testimonies)
 		if err := c.Bind(t); err != nil {
-			return c.String(http.StatusBadRequest, "bad request")
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 		if err := helpers.Validate(t, c); err != nil {
 			return err
@@ -71,7 +68,6 @@ func StoreTestimony(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	defer client.Close()
 	return nil
 }
 

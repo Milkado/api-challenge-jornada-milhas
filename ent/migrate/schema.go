@@ -30,6 +30,7 @@ var (
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "rand_security", Type: field.TypeString, Nullable: true},
+		{Name: "password_token", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
