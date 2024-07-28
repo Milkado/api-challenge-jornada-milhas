@@ -16,11 +16,15 @@
 
 `run one of the two:`
 
-`go run commands/rung.go --command=migrate`
+`go run commands/run.go --command=migrate`
 `or`
 `atlas migrate apply --dir "file://ent/migrate/migrations" --url "mysql://root:pass@host:port/db"`
 
 `atlas works with MariaDB, PostgreSQL or SQLite`
+
+`generate the jwt secret with:`
+
+`go run commands/run.go --command=generate_secret`
 
 #### Finally
 `go run main.go`

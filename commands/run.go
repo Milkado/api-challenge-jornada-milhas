@@ -4,7 +4,8 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/Milkado/api-challenge-jornada-milhas/atlas"
+	"github.com/Milkado/api-challenge-jornada-milhas/commands/atlas"
+	"github.com/Milkado/api-challenge-jornada-milhas/commands/jwt"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 )
 
@@ -29,6 +30,8 @@ func main() {
 		atlas.CreateMigration(name)
 	case "migrate":
 		atlas.Migrate()
+	case "generate_secret":
+		jwt.GenerateSecret()
 	default:
 		fmt.Println(helpers.Red + "Command not avaible" + helpers.Reset)
 	}
