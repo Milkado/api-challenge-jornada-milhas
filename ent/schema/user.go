@@ -19,6 +19,7 @@ func (User) Fields() []ent.Field {
 		field.String("email").Unique(),
 		field.String("password").Optional().Nillable(),
 		field.String("rand_security").Optional().Nillable(),
+		field.String("password_token").MaxLen(36).Optional().Nillable(),
 		field.Time("created_at").Default(time.Now()),
 		field.Time("updated_at").Default(time.Now()),
 	}

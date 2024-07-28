@@ -11,3 +11,13 @@ func Env(key string) string {
 
 	return viper.GetString(key)
 }
+
+func EnvInt(key string) int {
+	viper.SetConfigFile(".env")
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return viper.GetInt(key)
+}

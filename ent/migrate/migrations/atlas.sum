@@ -1,6 +1,7 @@
-h1:mhGPIsjv24q4jZ9pVEU44Ij1ARbqcCS2l51vsdWGylc=
+h1:yOY5bI4BNBhVO8zFyHxTlhL48YT/c/LcFMNgQOggTrI=
 20240629033552_create_testimonies_table.sql h1:5/bdk6lrBV2Igv7YyiJdq8FEpYYQtZMuY5/eWJehuXk=
 20240702000732_create_users_table.sql h1:N137BiXuA9ujoRzhfb+s9E2T3Y++hx5/KUqnbCn5fU0=
 20240702221317_alter_testimonies_add_timestamps.sql h1:M0RoZzoRqrvVb/Top6fN6JmMHvB8/ajvGnME7vUdvjc=
 20240710230017_alter_users_password_nil.sql h1:2aud/jOn4ShGx0g9TVgeUjeXSfdp5HkOUWl6WPIKkjs=
 20240710231013_fill_with_admin_user.sql h1:IVWSyDyitPEgogxEd9xJ2dmqL4Ja+RLMVJuhJM9rD5k=
+20240722203232_alter_users_add_password_token.sql h1:QdY0Mrydb34pz0icEuAey/M+IjBIRXoUXSyxNcteXno=
