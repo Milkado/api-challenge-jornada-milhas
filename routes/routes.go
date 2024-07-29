@@ -5,6 +5,7 @@ import (
 
 	"github.com/Milkado/api-challenge-jornada-milhas/controllers"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,8 +18,9 @@ func HandleRequest() {
 }
 
 func routes(echo *echo.Echo) {
-	// auth := echo.Group("api")
-	// auth.Use()
+	auth := echo.Group("api")
+	auth.Use(echojwt.JWT([]byte(helpers.Env("JWT_SECRET"))))
+	auth.GET("/me", controllers.Me)
 
 	open := echo.Group("api")
 
