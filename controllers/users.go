@@ -8,6 +8,7 @@ import (
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/user"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 	"github.com/Milkado/api-challenge-jornada-milhas/mail"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/tjarratt/babble"
@@ -30,6 +31,12 @@ type (
 		Link string
 	}
 )
+
+func Me(c echo.Context) error {
+	claims := c.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)
+
+	return c.JSON(http.StatusOK, claims)
+}
 
 func StorePassword(c echo.Context) error {
 	client := database.ConnectDB()

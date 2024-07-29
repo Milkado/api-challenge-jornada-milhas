@@ -17,9 +17,9 @@ type (
 		Password string `json:"password" xml:"password" form:"password" valdiate:"required"`
 	}
 	SignedUser struct {
-		ID    int
-		Email string
-		Name  string
+		ID    int    `json:"id"`
+		Email string `json:"email"`
+		Name  string `json:"name"`
 		jwt.RegisteredClaims
 	}
 	Token struct {
