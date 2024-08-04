@@ -2,10 +2,12 @@ package jwt
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 	"github.com/google/uuid"
 )
 
@@ -26,7 +28,12 @@ func GenerateSecret() {
 			line = `JWT_SECRET="` + uuid.NewString() + `"`
 			updated = true
 		}
+
 		fileContent += line + "\n"
+	}
+
+	if !updated {
+		fileContent += `JWT_SECRET="` + uuid.NewString() + `"` + "\n"
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -37,4 +44,6 @@ func GenerateSecret() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Println(helpers.Green + "JWT_SECRET generated" + helpers.Reset)
 }

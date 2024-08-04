@@ -1,0 +1,5 @@
+go 1.21.4
+
+use (
+	/Users/milk/Documents/Projects/go/api-challenge-jornada-milhas
+)

@@ -30,7 +30,7 @@ func main() {
 		atlas.CreateMigration(name)
 	case "migrate":
 		atlas.Migrate()
-	case "generate_secret":
+	case "generate:secret":
 		jwt.GenerateSecret()
 	default:
 		fmt.Println(helpers.Red + "Command not avaible" + helpers.Reset)
