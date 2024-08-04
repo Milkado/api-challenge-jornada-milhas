@@ -26,7 +26,7 @@ type (
 	Testimonies struct {
 		Testimony string `json:"testimony" xml:"testimony" form:"testimony" validate:"required,min=1"`
 		Name      string `json:"name" xml:"name" form:"name" validate:"required,min=1"`
-		Picture   string `json:"picture" xml:"picture" form:"picture" validate:"required,base64"`
+		Picture   string `json:"picture" xml:"picture" form:"picture" validate:"required"`
 	}
 )
 

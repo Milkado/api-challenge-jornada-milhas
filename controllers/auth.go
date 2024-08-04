@@ -41,8 +41,8 @@ func Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, uErr)
 	}
 
-	if hashError := checkHash(credentials.Password+*userGet.RandSecurity, *userGet.Password); hashError == false {
-		return c.JSON(http.StatusBadRequest, "Password is incorrect")
+	if hashError := checkHash(credentials.Password+*userGet.RandSecurity, *userGet.Password); hashError != nil {
+		return c.JSON(http.StatusBadRequest, "Email or password is incorrect")
 	}
 
 	token, tErr := generateJwt(userGet.Email, userGet.Name, userGet.ID)

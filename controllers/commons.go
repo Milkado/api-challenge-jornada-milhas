@@ -7,11 +7,9 @@ import (
 	"github.com/Milkado/api-challenge-jornada-milhas/ent"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 	"golang.org/x/crypto/bcrypt"
-	"gopkg.in/gomail.v2"
 )
 
 var ctx = context.Background()
-var dailer = gomail.NewDialer(helpers.Env("MAIL_HOST"), helpers.EnvInt("MAIL_PORT"), helpers.Env("MAIL_USER"), helpers.Env("MAIL_PASS"))
 
 func withTx(c context.Context, client ent.Client, fn func(tx *ent.Tx) error) error {
 	tx, err := client.Tx(c)
@@ -48,11 +46,11 @@ func hashPass(pass string) string {
 	return string(hashed)
 }
 
-func checkHash(pass string, hashed string) bool {
+func checkHash(pass string, hashed string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(pass))
 	if err != nil {
-		return false
+		return nil
 	}
 
-	return true
+	return err
 }
