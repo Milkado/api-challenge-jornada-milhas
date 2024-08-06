@@ -1,6 +1,7 @@
 package controllers_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -19,6 +20,7 @@ var (
 	  "testimony": "Haladren is strange. The gods creeps me out.",
 	  "picture": "test"
 	}`
+	testimonyId = "1"
 )
 
 func TestCreateTestimony(t *testing.T) {
@@ -44,9 +46,20 @@ func TestShowTestimony(t *testing.T) {
 	c.SetParamNames("id")
 	c.SetParamValues("1")
 
-	if assert.NoError(t, controllers.ShowTestimony(c)) {
-		if assert.Equal(t, http.StatusOK, rec.Code) {
-			fmt.Println(helpers.Green + "TestShowTestimony passed" + helpers.Reset)
+	type TestimonyResponse struct {
+		ID string `json:"id"`
+	}
+
+	var response TestimonyResponse
+	err := json.Unmarshal(rec.Body.Bytes(), &response) // test later
+
+	if assert.NoError(t, err) {
+		if assert.NoError(t, controllers.ShowTestimony(c)) {
+			if assert.Equal(t, http.StatusOK, rec.Code) {
+				if assert.Equal(t, testimonyId, response.ID) {
+					fmt.Println(helpers.Green + "TestShowTestimony passed" + helpers.Reset)
+				}
+			}
 		}
 	}
 }

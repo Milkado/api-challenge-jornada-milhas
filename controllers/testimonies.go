@@ -74,7 +74,7 @@ func StoreTestimony(c echo.Context) error {
 func ShowTestimony(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		panic(err)
+		c.JSON(http.StatusInternalServerError, err)
 	}
 
 	client := database.ConnectDB()

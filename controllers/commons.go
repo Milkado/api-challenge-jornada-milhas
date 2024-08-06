@@ -3,9 +3,12 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/Milkado/api-challenge-jornada-milhas/ent"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
+	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -53,4 +56,13 @@ func checkHash(pass string, hashed string) error {
 	}
 
 	return err
+}
+
+func idToInt(c echo.Context, idParam string) int {
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+	}
+
+	return id
 }
