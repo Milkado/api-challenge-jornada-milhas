@@ -20,7 +20,7 @@ func main() {
 
 	if command == "" {
 		fmt.Println(helpers.Red + "--command flag missing, choose one of the avaible:" + helpers.Reset)
-		fmt.Println(helpers.Green + "migration_create, required the --name flag")
+		fmt.Println(helpers.Green + "migration_create, required the migration_name flag")
 		fmt.Println("migrate" + helpers.Reset)
 		return
 	}

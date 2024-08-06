@@ -7,6 +7,7 @@ import (
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/Milkado/api-challenge-jornada-milhas/ent/runtime"
 )
 
 func ConnectDB() ent.Client {

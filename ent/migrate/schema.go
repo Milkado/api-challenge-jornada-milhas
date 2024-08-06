@@ -8,6 +8,21 @@ import (
 )
 
 var (
+	// DestiniesColumns holds the columns for the "destinies" table.
+	DestiniesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "picture", Type: field.TypeString, Unique: true},
+		{Name: "price", Type: field.TypeFloat64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// DestiniesTable holds the schema information for the "destinies" table.
+	DestiniesTable = &schema.Table{
+		Name:       "destinies",
+		Columns:    DestiniesColumns,
+		PrimaryKey: []*schema.Column{DestiniesColumns[0]},
+	}
 	// TestimoniesColumns holds the columns for the "testimonies" table.
 	TestimoniesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -42,6 +57,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		DestiniesTable,
 		TestimoniesTable,
 		UsersTable,
 	}

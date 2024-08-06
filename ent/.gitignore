@@ -2,3 +2,6 @@
 !.gitignore
 !schema/*
 !migrate/*
+!hook/*
+!runtime/*
+!enttest/*

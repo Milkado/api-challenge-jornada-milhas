@@ -35,12 +35,19 @@ func routes(echo *echo.Echo) {
 	open.GET("/depoimentos", controllers.IndexTestimonies)
 	open.GET("/depoimentos/:id", controllers.ShowTestimony)
 	open.POST("/depoimentos", controllers.StoreTestimony)
-	open.PATCH("/depoimentos/:id", placeHolderEcho)  //Change to authenticated
-	open.DELETE("/depoimentos/:id", placeHolderEcho) //Change to authenticated
+	auth.PATCH("/depoimentos/:id", placeHolderEcho)  //TODO: Function and test
+	auth.DELETE("/depoimentos/:id", placeHolderEcho) //TODO: Function and test
 
 	//User
 	open.POST("/request-new-password", controllers.RequestNewPassword)
 	open.PATCH("/create-password/:token", controllers.StorePassword)
+
+	//Destinies
+	open.GET("/destinies", controllers.IndexDestinies)
+	open.GET("/destinies/:id", controllers.ShowDestinies)    //TODO: Function and test
+	auth.POST("/destinies", controllers.StoreDestinies)      //TODO: Function and test
+	auth.PATCH("/destinies/:id", controllers.ChangeDestiny)  //TODO: Function and test
+	auth.DELETE("/destinies/:id", controllers.DeleteDestiny) //TODO: Function and test
 
 }
 
