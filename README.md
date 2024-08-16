@@ -35,7 +35,8 @@ By default the server runs on 8080 port
 
 Tests are in the `test` folder, but go runs tests directly from the go path. So, the tests need to be built before running them.
 
-`go test ./test/*_test.go` or `go test ./test`
+`go test ./test/folder/*_test.go` or `go test ./test/folder`
 
 The first one will build the test by the chosen test, the second one will build all the tests.
 
+Than run the tests with `./generated.test`
