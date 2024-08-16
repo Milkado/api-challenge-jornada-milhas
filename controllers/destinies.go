@@ -20,11 +20,8 @@ type (
 		Picture string  `json:"picture" xml:"picture" form:"picture" validate:"required"`
 	}
 	DestiniesUpdate struct {
-		Name    string  `json:"name" xml:"name" form:"name" validate:"required,min=1"`
-		Price   float64 `json:"price" xml:"price" form:"price" validate:"required,numeric"`
-	}
-	PictureUpdate struct {
-		Picture string `json:"picture" xml:"picture" form:"picture" validate:"required"`
+		Name  string  `json:"name" xml:"name" form:"name" validate:"required,min=1"`
+		Price float64 `json:"price" xml:"price" form:"price" validate:"required,numeric"`
 	}
 )
 
@@ -96,8 +93,8 @@ func ChangeDestiny(c echo.Context) error {
 		if err := c.Bind(d); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		
-		destiny ,err := client.Destinies.UpdateOneID(id).SetName(d.Name).SetPrice(d.Price).Save(ctx)
+
+		destiny, err := client.Destinies.UpdateOneID(id).SetName(d.Name).SetPrice(d.Price).Save(ctx)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -125,7 +122,7 @@ func DeleteDestiny(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, deleteErr)
 		}
 
-		return c.JSON(http.StatusOK, "Destiny deleted")
+		return c.JSON(http.StatusOK, "Deleted")
 	}); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}

@@ -27,6 +27,8 @@ func init() {
 	destiniesDescUpdatedAt := destiniesFields[4].Descriptor()
 	// destinies.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	destinies.DefaultUpdatedAt = destiniesDescUpdatedAt.Default.(func() time.Time)
+	testimoniesHooks := schema.Testimonies{}.Hooks()
+	testimonies.Hooks[0] = testimoniesHooks[0]
 	testimoniesFields := schema.Testimonies{}.Fields()
 	_ = testimoniesFields
 	// testimoniesDescCreatedAt is the schema descriptor for created_at field.

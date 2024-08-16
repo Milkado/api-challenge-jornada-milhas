@@ -12,6 +12,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type (
+	PictureUpdate struct {
+		Picture string `json:"picture" xml:"picture" form:"picture" validate:"required"`
+	}
+)
+
 var ctx = context.Background()
 
 func withTx(c context.Context, client ent.Client, fn func(tx *ent.Tx) error) error {
