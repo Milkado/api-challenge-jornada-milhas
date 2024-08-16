@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/Milkado/api-challenge-jornada-milhas/controllers"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -35,8 +33,8 @@ func routes(echo *echo.Echo) {
 	open.GET("/depoimentos", controllers.IndexTestimonies)
 	open.GET("/depoimentos/:id", controllers.ShowTestimony)
 	open.POST("/depoimentos", controllers.StoreTestimony)
-	auth.PATCH("/depoimentos/:id", placeHolderEcho)  //TODO: Function and test
-	auth.DELETE("/depoimentos/:id", placeHolderEcho) //TODO: Function and test
+	auth.PATCH("/depoimentos/:id", controllers.ChangeTestimony)  //TODO: Function and test
+	auth.DELETE("/depoimentos/:id", controllers.DeleteTestimony) //TODO: Function and test
 
 	//User
 	open.POST("/request-new-password", controllers.RequestNewPassword)
@@ -51,6 +49,6 @@ func routes(echo *echo.Echo) {
 
 }
 
-func placeHolderEcho(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
-}
+// func placeHolderEcho(c echo.Context) error {
+// 	return c.String(http.StatusOK, "Hello, World!")
+// }
