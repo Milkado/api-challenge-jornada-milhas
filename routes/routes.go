@@ -33,9 +33,9 @@ func routes(echo *echo.Echo) {
 	open.GET("/depoimentos", controllers.IndexTestimonies)
 	open.GET("/depoimentos/:id", controllers.ShowTestimony)
 	open.POST("/depoimentos", controllers.StoreTestimony)
-	auth.PATCH("/depoimentos/:id", controllers.ChangeTestimony)  //TODO: Function and test
-	auth.DELETE("/depoimentos/:id", controllers.DeleteTestimony) //TODO: Function and test
-
+	auth.PATCH("/depoimentos/:id", controllers.ChangeTestimony)  
+	auth.DELETE("/depoimentos/:id", controllers.DeleteTestimony)
+	
 	//User
 	open.POST("/request-new-password", controllers.RequestNewPassword)
 	open.PATCH("/create-password/:token", controllers.StorePassword)
