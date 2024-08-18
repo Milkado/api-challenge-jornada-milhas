@@ -19,8 +19,9 @@ type Destinies struct {
 func (Destinies) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
-		field.String("picture").Unique(),
 		field.Float("price"),
+		field.String("meta").MaxLen(160),
+		field.Text("description").Optional().Nillable(),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now),
 	}

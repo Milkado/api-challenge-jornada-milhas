@@ -42,20 +42,6 @@ func (du *DestiniesUpdate) SetNillableName(s *string) *DestiniesUpdate {
 	return du
 }
 
-// SetPicture sets the "picture" field.
-func (du *DestiniesUpdate) SetPicture(s string) *DestiniesUpdate {
-	du.mutation.SetPicture(s)
-	return du
-}
-
-// SetNillablePicture sets the "picture" field if the given value is not nil.
-func (du *DestiniesUpdate) SetNillablePicture(s *string) *DestiniesUpdate {
-	if s != nil {
-		du.SetPicture(*s)
-	}
-	return du
-}
-
 // SetPrice sets the "price" field.
 func (du *DestiniesUpdate) SetPrice(f float64) *DestiniesUpdate {
 	du.mutation.ResetPrice()
@@ -74,6 +60,40 @@ func (du *DestiniesUpdate) SetNillablePrice(f *float64) *DestiniesUpdate {
 // AddPrice adds f to the "price" field.
 func (du *DestiniesUpdate) AddPrice(f float64) *DestiniesUpdate {
 	du.mutation.AddPrice(f)
+	return du
+}
+
+// SetMeta sets the "meta" field.
+func (du *DestiniesUpdate) SetMeta(s string) *DestiniesUpdate {
+	du.mutation.SetMeta(s)
+	return du
+}
+
+// SetNillableMeta sets the "meta" field if the given value is not nil.
+func (du *DestiniesUpdate) SetNillableMeta(s *string) *DestiniesUpdate {
+	if s != nil {
+		du.SetMeta(*s)
+	}
+	return du
+}
+
+// SetDescription sets the "description" field.
+func (du *DestiniesUpdate) SetDescription(s string) *DestiniesUpdate {
+	du.mutation.SetDescription(s)
+	return du
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (du *DestiniesUpdate) SetNillableDescription(s *string) *DestiniesUpdate {
+	if s != nil {
+		du.SetDescription(*s)
+	}
+	return du
+}
+
+// ClearDescription clears the value of the "description" field.
+func (du *DestiniesUpdate) ClearDescription() *DestiniesUpdate {
+	du.mutation.ClearDescription()
 	return du
 }
 
@@ -137,7 +157,20 @@ func (du *DestiniesUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (du *DestiniesUpdate) check() error {
+	if v, ok := du.mutation.Meta(); ok {
+		if err := destinies.MetaValidator(v); err != nil {
+			return &ValidationError{Name: "meta", err: fmt.Errorf(`ent: validator failed for field "Destinies.meta": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (du *DestiniesUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := du.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(destinies.Table, destinies.Columns, sqlgraph.NewFieldSpec(destinies.FieldID, field.TypeInt))
 	if ps := du.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -149,14 +182,20 @@ func (du *DestiniesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := du.mutation.Name(); ok {
 		_spec.SetField(destinies.FieldName, field.TypeString, value)
 	}
-	if value, ok := du.mutation.Picture(); ok {
-		_spec.SetField(destinies.FieldPicture, field.TypeString, value)
-	}
 	if value, ok := du.mutation.Price(); ok {
 		_spec.SetField(destinies.FieldPrice, field.TypeFloat64, value)
 	}
 	if value, ok := du.mutation.AddedPrice(); ok {
 		_spec.AddField(destinies.FieldPrice, field.TypeFloat64, value)
+	}
+	if value, ok := du.mutation.Meta(); ok {
+		_spec.SetField(destinies.FieldMeta, field.TypeString, value)
+	}
+	if value, ok := du.mutation.Description(); ok {
+		_spec.SetField(destinies.FieldDescription, field.TypeString, value)
+	}
+	if du.mutation.DescriptionCleared() {
+		_spec.ClearField(destinies.FieldDescription, field.TypeString)
 	}
 	if value, ok := du.mutation.CreatedAt(); ok {
 		_spec.SetField(destinies.FieldCreatedAt, field.TypeTime, value)
@@ -198,20 +237,6 @@ func (duo *DestiniesUpdateOne) SetNillableName(s *string) *DestiniesUpdateOne {
 	return duo
 }
 
-// SetPicture sets the "picture" field.
-func (duo *DestiniesUpdateOne) SetPicture(s string) *DestiniesUpdateOne {
-	duo.mutation.SetPicture(s)
-	return duo
-}
-
-// SetNillablePicture sets the "picture" field if the given value is not nil.
-func (duo *DestiniesUpdateOne) SetNillablePicture(s *string) *DestiniesUpdateOne {
-	if s != nil {
-		duo.SetPicture(*s)
-	}
-	return duo
-}
-
 // SetPrice sets the "price" field.
 func (duo *DestiniesUpdateOne) SetPrice(f float64) *DestiniesUpdateOne {
 	duo.mutation.ResetPrice()
@@ -230,6 +255,40 @@ func (duo *DestiniesUpdateOne) SetNillablePrice(f *float64) *DestiniesUpdateOne 
 // AddPrice adds f to the "price" field.
 func (duo *DestiniesUpdateOne) AddPrice(f float64) *DestiniesUpdateOne {
 	duo.mutation.AddPrice(f)
+	return duo
+}
+
+// SetMeta sets the "meta" field.
+func (duo *DestiniesUpdateOne) SetMeta(s string) *DestiniesUpdateOne {
+	duo.mutation.SetMeta(s)
+	return duo
+}
+
+// SetNillableMeta sets the "meta" field if the given value is not nil.
+func (duo *DestiniesUpdateOne) SetNillableMeta(s *string) *DestiniesUpdateOne {
+	if s != nil {
+		duo.SetMeta(*s)
+	}
+	return duo
+}
+
+// SetDescription sets the "description" field.
+func (duo *DestiniesUpdateOne) SetDescription(s string) *DestiniesUpdateOne {
+	duo.mutation.SetDescription(s)
+	return duo
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (duo *DestiniesUpdateOne) SetNillableDescription(s *string) *DestiniesUpdateOne {
+	if s != nil {
+		duo.SetDescription(*s)
+	}
+	return duo
+}
+
+// ClearDescription clears the value of the "description" field.
+func (duo *DestiniesUpdateOne) ClearDescription() *DestiniesUpdateOne {
+	duo.mutation.ClearDescription()
 	return duo
 }
 
@@ -306,7 +365,20 @@ func (duo *DestiniesUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (duo *DestiniesUpdateOne) check() error {
+	if v, ok := duo.mutation.Meta(); ok {
+		if err := destinies.MetaValidator(v); err != nil {
+			return &ValidationError{Name: "meta", err: fmt.Errorf(`ent: validator failed for field "Destinies.meta": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (duo *DestiniesUpdateOne) sqlSave(ctx context.Context) (_node *Destinies, err error) {
+	if err := duo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(destinies.Table, destinies.Columns, sqlgraph.NewFieldSpec(destinies.FieldID, field.TypeInt))
 	id, ok := duo.mutation.ID()
 	if !ok {
@@ -335,14 +407,20 @@ func (duo *DestiniesUpdateOne) sqlSave(ctx context.Context) (_node *Destinies, e
 	if value, ok := duo.mutation.Name(); ok {
 		_spec.SetField(destinies.FieldName, field.TypeString, value)
 	}
-	if value, ok := duo.mutation.Picture(); ok {
-		_spec.SetField(destinies.FieldPicture, field.TypeString, value)
-	}
 	if value, ok := duo.mutation.Price(); ok {
 		_spec.SetField(destinies.FieldPrice, field.TypeFloat64, value)
 	}
 	if value, ok := duo.mutation.AddedPrice(); ok {
 		_spec.AddField(destinies.FieldPrice, field.TypeFloat64, value)
+	}
+	if value, ok := duo.mutation.Meta(); ok {
+		_spec.SetField(destinies.FieldMeta, field.TypeString, value)
+	}
+	if value, ok := duo.mutation.Description(); ok {
+		_spec.SetField(destinies.FieldDescription, field.TypeString, value)
+	}
+	if duo.mutation.DescriptionCleared() {
+		_spec.ClearField(destinies.FieldDescription, field.TypeString)
 	}
 	if value, ok := duo.mutation.CreatedAt(); ok {
 		_spec.SetField(destinies.FieldCreatedAt, field.TypeTime, value)

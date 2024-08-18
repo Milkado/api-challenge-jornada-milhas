@@ -15,14 +15,20 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	destiniesHooks := schema.Destinies{}.Hooks()
+	destinies.Hooks[0] = destiniesHooks[0]
 	destiniesFields := schema.Destinies{}.Fields()
 	_ = destiniesFields
+	// destiniesDescMeta is the schema descriptor for meta field.
+	destiniesDescMeta := destiniesFields[2].Descriptor()
+	// destinies.MetaValidator is a validator for the "meta" field. It is called by the builders before save.
+	destinies.MetaValidator = destiniesDescMeta.Validators[0].(func(string) error)
 	// destiniesDescCreatedAt is the schema descriptor for created_at field.
-	destiniesDescCreatedAt := destiniesFields[3].Descriptor()
+	destiniesDescCreatedAt := destiniesFields[4].Descriptor()
 	// destinies.DefaultCreatedAt holds the default value on creation for the created_at field.
 	destinies.DefaultCreatedAt = destiniesDescCreatedAt.Default.(func() time.Time)
 	// destiniesDescUpdatedAt is the schema descriptor for updated_at field.
-	destiniesDescUpdatedAt := destiniesFields[4].Descriptor()
+	destiniesDescUpdatedAt := destiniesFields[5].Descriptor()
 	// destinies.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	destinies.DefaultUpdatedAt = destiniesDescUpdatedAt.Default.(func() time.Time)
 	testimoniesHooks := schema.Testimonies{}.Hooks()

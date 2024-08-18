@@ -326,7 +326,8 @@ func (c *DestiniesClient) GetX(ctx context.Context, id int) *Destinies {
 
 // Hooks returns the client hooks.
 func (c *DestiniesClient) Hooks() []Hook {
-	return c.hooks.Destinies
+	hooks := c.hooks.Destinies
+	return append(hooks[:len(hooks):len(hooks)], destinies.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.

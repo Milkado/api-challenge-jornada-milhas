@@ -12,8 +12,9 @@ var (
 	DestiniesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "picture", Type: field.TypeString, Unique: true},
 		{Name: "price", Type: field.TypeFloat64},
+		{Name: "meta", Type: field.TypeString, Size: 160},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}

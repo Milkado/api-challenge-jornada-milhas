@@ -59,14 +59,19 @@ func Name(v string) predicate.Destinies {
 	return predicate.Destinies(sql.FieldEQ(FieldName, v))
 }
 
-// Picture applies equality check predicate on the "picture" field. It's identical to PictureEQ.
-func Picture(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldEQ(FieldPicture, v))
-}
-
 // Price applies equality check predicate on the "price" field. It's identical to PriceEQ.
 func Price(v float64) predicate.Destinies {
 	return predicate.Destinies(sql.FieldEQ(FieldPrice, v))
+}
+
+// Meta applies equality check predicate on the "meta" field. It's identical to MetaEQ.
+func Meta(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldEQ(FieldMeta, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldEQ(FieldDescription, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -144,71 +149,6 @@ func NameContainsFold(v string) predicate.Destinies {
 	return predicate.Destinies(sql.FieldContainsFold(FieldName, v))
 }
 
-// PictureEQ applies the EQ predicate on the "picture" field.
-func PictureEQ(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldEQ(FieldPicture, v))
-}
-
-// PictureNEQ applies the NEQ predicate on the "picture" field.
-func PictureNEQ(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldNEQ(FieldPicture, v))
-}
-
-// PictureIn applies the In predicate on the "picture" field.
-func PictureIn(vs ...string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldIn(FieldPicture, vs...))
-}
-
-// PictureNotIn applies the NotIn predicate on the "picture" field.
-func PictureNotIn(vs ...string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldNotIn(FieldPicture, vs...))
-}
-
-// PictureGT applies the GT predicate on the "picture" field.
-func PictureGT(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldGT(FieldPicture, v))
-}
-
-// PictureGTE applies the GTE predicate on the "picture" field.
-func PictureGTE(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldGTE(FieldPicture, v))
-}
-
-// PictureLT applies the LT predicate on the "picture" field.
-func PictureLT(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldLT(FieldPicture, v))
-}
-
-// PictureLTE applies the LTE predicate on the "picture" field.
-func PictureLTE(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldLTE(FieldPicture, v))
-}
-
-// PictureContains applies the Contains predicate on the "picture" field.
-func PictureContains(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldContains(FieldPicture, v))
-}
-
-// PictureHasPrefix applies the HasPrefix predicate on the "picture" field.
-func PictureHasPrefix(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldHasPrefix(FieldPicture, v))
-}
-
-// PictureHasSuffix applies the HasSuffix predicate on the "picture" field.
-func PictureHasSuffix(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldHasSuffix(FieldPicture, v))
-}
-
-// PictureEqualFold applies the EqualFold predicate on the "picture" field.
-func PictureEqualFold(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldEqualFold(FieldPicture, v))
-}
-
-// PictureContainsFold applies the ContainsFold predicate on the "picture" field.
-func PictureContainsFold(v string) predicate.Destinies {
-	return predicate.Destinies(sql.FieldContainsFold(FieldPicture, v))
-}
-
 // PriceEQ applies the EQ predicate on the "price" field.
 func PriceEQ(v float64) predicate.Destinies {
 	return predicate.Destinies(sql.FieldEQ(FieldPrice, v))
@@ -247,6 +187,146 @@ func PriceLT(v float64) predicate.Destinies {
 // PriceLTE applies the LTE predicate on the "price" field.
 func PriceLTE(v float64) predicate.Destinies {
 	return predicate.Destinies(sql.FieldLTE(FieldPrice, v))
+}
+
+// MetaEQ applies the EQ predicate on the "meta" field.
+func MetaEQ(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldEQ(FieldMeta, v))
+}
+
+// MetaNEQ applies the NEQ predicate on the "meta" field.
+func MetaNEQ(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldNEQ(FieldMeta, v))
+}
+
+// MetaIn applies the In predicate on the "meta" field.
+func MetaIn(vs ...string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldIn(FieldMeta, vs...))
+}
+
+// MetaNotIn applies the NotIn predicate on the "meta" field.
+func MetaNotIn(vs ...string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldNotIn(FieldMeta, vs...))
+}
+
+// MetaGT applies the GT predicate on the "meta" field.
+func MetaGT(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldGT(FieldMeta, v))
+}
+
+// MetaGTE applies the GTE predicate on the "meta" field.
+func MetaGTE(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldGTE(FieldMeta, v))
+}
+
+// MetaLT applies the LT predicate on the "meta" field.
+func MetaLT(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldLT(FieldMeta, v))
+}
+
+// MetaLTE applies the LTE predicate on the "meta" field.
+func MetaLTE(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldLTE(FieldMeta, v))
+}
+
+// MetaContains applies the Contains predicate on the "meta" field.
+func MetaContains(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldContains(FieldMeta, v))
+}
+
+// MetaHasPrefix applies the HasPrefix predicate on the "meta" field.
+func MetaHasPrefix(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldHasPrefix(FieldMeta, v))
+}
+
+// MetaHasSuffix applies the HasSuffix predicate on the "meta" field.
+func MetaHasSuffix(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldHasSuffix(FieldMeta, v))
+}
+
+// MetaEqualFold applies the EqualFold predicate on the "meta" field.
+func MetaEqualFold(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldEqualFold(FieldMeta, v))
+}
+
+// MetaContainsFold applies the ContainsFold predicate on the "meta" field.
+func MetaContainsFold(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldContainsFold(FieldMeta, v))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionIsNil applies the IsNil predicate on the "description" field.
+func DescriptionIsNil() predicate.Destinies {
+	return predicate.Destinies(sql.FieldIsNull(FieldDescription))
+}
+
+// DescriptionNotNil applies the NotNil predicate on the "description" field.
+func DescriptionNotNil() predicate.Destinies {
+	return predicate.Destinies(sql.FieldNotNull(FieldDescription))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Destinies {
+	return predicate.Destinies(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

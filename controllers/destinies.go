@@ -3,30 +3,35 @@ package controllers
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/Milkado/api-challenge-jornada-milhas/database"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 type (
 	Destinies struct {
-		Name    string  `json:"name" xml:"name" form:"name" validate:"required,min=1"`
-		Price   float64 `json:"price" xml:"price" form:"price" validate:"required,numeric"`
-		Picture string  `json:"picture" xml:"picture" form:"picture" validate:"required"`
-	}
-	DestiniesUpdate struct {
-		Name  string  `json:"name" xml:"name" form:"name" validate:"required,min=1"`
-		Price float64 `json:"price" xml:"price" form:"price" validate:"required,numeric"`
+		Name        string  `json:"name" xml:"name" form:"name" validate:"required,min=1"`
+		Price       float64 `json:"price" xml:"price" form:"price" validate:"required,numeric"`
+		Meta        string  `json:"meta" xml:"meta" form:"meta" validate:"required,min=1,max=160"`
+		Description *string `json:"description,omitempty" xml:"description,omitempty" form:"description,omitempty"`
 	}
 )
 
 func IndexDestinies(c echo.Context) error {
 	client := database.ConnectDB()
+	defer client.Close()
+
+	if c.QueryString() != "" {
+		destinies, err := client.Destinies.Query().Where(destinies.NameContainsFold(c.QueryParam("name"))).All(ctx)
+		if err != nil {
+			c.JSON(http.StatusAccepted, err)
+		}
+		return c.JSON(http.StatusOK, destinies)
+	}
+
 	destinies, err := client.Destinies.Query().All(ctx)
 	defer client.Close()
 	if err != nil {
@@ -43,6 +48,7 @@ func ShowDestinies(c echo.Context) error {
 	}
 
 	client := database.ConnectDB()
+	defer client.Close()
 	destiny, sErr := client.Destinies.Query().Where(destinies.ID(id)).Only(ctx)
 
 	if sErr != nil {
@@ -57,6 +63,7 @@ func ShowDestinies(c echo.Context) error {
 
 func StoreDestinies(c echo.Context) error {
 	client := database.ConnectDB()
+	defer client.Close()
 
 	if err := withTx(ctx, client, func(tx *ent.Tx) error {
 		d := new(Destinies)
@@ -67,9 +74,7 @@ func StoreDestinies(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, validateErr)
 		}
 
-		picture := uuid.New().String() + time.Now().Format("2006-01-02")
-
-		newDestiny, storeErr := client.Destinies.Create().SetName(d.Name).SetPicture(picture).SetPrice(d.Price).Save(ctx)
+		newDestiny, storeErr := client.Destinies.Create().SetName(d.Name).SetPrice(d.Price).SetMeta(d.Meta).SetNillableDescription(d.Description).Save(ctx)
 
 		if storeErr != nil {
 			return c.JSON(http.StatusBadRequest, storeErr)
@@ -80,21 +85,21 @@ func StoreDestinies(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	defer client.Close()
 	return nil
 }
 
 func ChangeDestiny(c echo.Context) error {
 	client := database.ConnectDB()
+	defer client.Close()
 
 	if err := withTx(ctx, client, func(tx *ent.Tx) error {
 		id := idToInt(c, c.Param("id"))
-		d := new(DestiniesUpdate)
+		d := new(Destinies)
 		if err := c.Bind(d); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
 
-		destiny, err := client.Destinies.UpdateOneID(id).SetName(d.Name).SetPrice(d.Price).Save(ctx)
+		destiny, err := client.Destinies.UpdateOneID(id).SetName(d.Name).SetPrice(d.Price).SetMeta(d.Meta).SetNillableDescription(d.Description).Save(ctx)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
@@ -104,12 +109,12 @@ func ChangeDestiny(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	defer client.Close()
 	return nil
 }
 
 func DeleteDestiny(c echo.Context) error {
 	client := database.ConnectDB()
+	defer client.Close()
 
 	if err := withTx(ctx, client, func(tx *ent.Tx) error {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -127,6 +132,5 @@ func DeleteDestiny(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	defer client.Close()
 	return nil
 }

@@ -38,9 +38,10 @@ type DestiniesMutation struct {
 	typ           string
 	id            *int
 	name          *string
-	picture       *string
 	price         *float64
 	addprice      *float64
+	meta          *string
+	description   *string
 	created_at    *time.Time
 	updated_at    *time.Time
 	clearedFields map[string]struct{}
@@ -183,42 +184,6 @@ func (m *DestiniesMutation) ResetName() {
 	m.name = nil
 }
 
-// SetPicture sets the "picture" field.
-func (m *DestiniesMutation) SetPicture(s string) {
-	m.picture = &s
-}
-
-// Picture returns the value of the "picture" field in the mutation.
-func (m *DestiniesMutation) Picture() (r string, exists bool) {
-	v := m.picture
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPicture returns the old "picture" field's value of the Destinies entity.
-// If the Destinies object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DestiniesMutation) OldPicture(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPicture is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPicture requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPicture: %w", err)
-	}
-	return oldValue.Picture, nil
-}
-
-// ResetPicture resets all changes to the "picture" field.
-func (m *DestiniesMutation) ResetPicture() {
-	m.picture = nil
-}
-
 // SetPrice sets the "price" field.
 func (m *DestiniesMutation) SetPrice(f float64) {
 	m.price = &f
@@ -273,6 +238,91 @@ func (m *DestiniesMutation) AddedPrice() (r float64, exists bool) {
 func (m *DestiniesMutation) ResetPrice() {
 	m.price = nil
 	m.addprice = nil
+}
+
+// SetMeta sets the "meta" field.
+func (m *DestiniesMutation) SetMeta(s string) {
+	m.meta = &s
+}
+
+// Meta returns the value of the "meta" field in the mutation.
+func (m *DestiniesMutation) Meta() (r string, exists bool) {
+	v := m.meta
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMeta returns the old "meta" field's value of the Destinies entity.
+// If the Destinies object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DestiniesMutation) OldMeta(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMeta is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMeta requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMeta: %w", err)
+	}
+	return oldValue.Meta, nil
+}
+
+// ResetMeta resets all changes to the "meta" field.
+func (m *DestiniesMutation) ResetMeta() {
+	m.meta = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *DestiniesMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *DestiniesMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Destinies entity.
+// If the Destinies object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DestiniesMutation) OldDescription(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *DestiniesMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[destinies.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *DestiniesMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[destinies.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *DestiniesMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, destinies.FieldDescription)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -381,15 +431,18 @@ func (m *DestiniesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DestiniesMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.name != nil {
 		fields = append(fields, destinies.FieldName)
 	}
-	if m.picture != nil {
-		fields = append(fields, destinies.FieldPicture)
-	}
 	if m.price != nil {
 		fields = append(fields, destinies.FieldPrice)
+	}
+	if m.meta != nil {
+		fields = append(fields, destinies.FieldMeta)
+	}
+	if m.description != nil {
+		fields = append(fields, destinies.FieldDescription)
 	}
 	if m.created_at != nil {
 		fields = append(fields, destinies.FieldCreatedAt)
@@ -407,10 +460,12 @@ func (m *DestiniesMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case destinies.FieldName:
 		return m.Name()
-	case destinies.FieldPicture:
-		return m.Picture()
 	case destinies.FieldPrice:
 		return m.Price()
+	case destinies.FieldMeta:
+		return m.Meta()
+	case destinies.FieldDescription:
+		return m.Description()
 	case destinies.FieldCreatedAt:
 		return m.CreatedAt()
 	case destinies.FieldUpdatedAt:
@@ -426,10 +481,12 @@ func (m *DestiniesMutation) OldField(ctx context.Context, name string) (ent.Valu
 	switch name {
 	case destinies.FieldName:
 		return m.OldName(ctx)
-	case destinies.FieldPicture:
-		return m.OldPicture(ctx)
 	case destinies.FieldPrice:
 		return m.OldPrice(ctx)
+	case destinies.FieldMeta:
+		return m.OldMeta(ctx)
+	case destinies.FieldDescription:
+		return m.OldDescription(ctx)
 	case destinies.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case destinies.FieldUpdatedAt:
@@ -450,19 +507,26 @@ func (m *DestiniesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case destinies.FieldPicture:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPicture(v)
-		return nil
 	case destinies.FieldPrice:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPrice(v)
+		return nil
+	case destinies.FieldMeta:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMeta(v)
+		return nil
+	case destinies.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	case destinies.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -522,7 +586,11 @@ func (m *DestiniesMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *DestiniesMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(destinies.FieldDescription) {
+		fields = append(fields, destinies.FieldDescription)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -535,6 +603,11 @@ func (m *DestiniesMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *DestiniesMutation) ClearField(name string) error {
+	switch name {
+	case destinies.FieldDescription:
+		m.ClearDescription()
+		return nil
+	}
 	return fmt.Errorf("unknown Destinies nullable field %s", name)
 }
 
@@ -545,11 +618,14 @@ func (m *DestiniesMutation) ResetField(name string) error {
 	case destinies.FieldName:
 		m.ResetName()
 		return nil
-	case destinies.FieldPicture:
-		m.ResetPicture()
-		return nil
 	case destinies.FieldPrice:
 		m.ResetPrice()
+		return nil
+	case destinies.FieldMeta:
+		m.ResetMeta()
+		return nil
+	case destinies.FieldDescription:
+		m.ResetDescription()
 		return nil
 	case destinies.FieldCreatedAt:
 		m.ResetCreatedAt()

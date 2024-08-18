@@ -26,15 +26,29 @@ func (dc *DestiniesCreate) SetName(s string) *DestiniesCreate {
 	return dc
 }
 
-// SetPicture sets the "picture" field.
-func (dc *DestiniesCreate) SetPicture(s string) *DestiniesCreate {
-	dc.mutation.SetPicture(s)
-	return dc
-}
-
 // SetPrice sets the "price" field.
 func (dc *DestiniesCreate) SetPrice(f float64) *DestiniesCreate {
 	dc.mutation.SetPrice(f)
+	return dc
+}
+
+// SetMeta sets the "meta" field.
+func (dc *DestiniesCreate) SetMeta(s string) *DestiniesCreate {
+	dc.mutation.SetMeta(s)
+	return dc
+}
+
+// SetDescription sets the "description" field.
+func (dc *DestiniesCreate) SetDescription(s string) *DestiniesCreate {
+	dc.mutation.SetDescription(s)
+	return dc
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (dc *DestiniesCreate) SetNillableDescription(s *string) *DestiniesCreate {
+	if s != nil {
+		dc.SetDescription(*s)
+	}
 	return dc
 }
 
@@ -73,7 +87,9 @@ func (dc *DestiniesCreate) Mutation() *DestiniesMutation {
 
 // Save creates the Destinies in the database.
 func (dc *DestiniesCreate) Save(ctx context.Context) (*Destinies, error) {
-	dc.defaults()
+	if err := dc.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, dc.sqlSave, dc.mutation, dc.hooks)
 }
 
@@ -100,15 +116,22 @@ func (dc *DestiniesCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (dc *DestiniesCreate) defaults() {
+func (dc *DestiniesCreate) defaults() error {
 	if _, ok := dc.mutation.CreatedAt(); !ok {
+		if destinies.DefaultCreatedAt == nil {
+			return fmt.Errorf("ent: uninitialized destinies.DefaultCreatedAt (forgotten import ent/runtime?)")
+		}
 		v := destinies.DefaultCreatedAt()
 		dc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := dc.mutation.UpdatedAt(); !ok {
+		if destinies.DefaultUpdatedAt == nil {
+			return fmt.Errorf("ent: uninitialized destinies.DefaultUpdatedAt (forgotten import ent/runtime?)")
+		}
 		v := destinies.DefaultUpdatedAt()
 		dc.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -116,11 +139,16 @@ func (dc *DestiniesCreate) check() error {
 	if _, ok := dc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Destinies.name"`)}
 	}
-	if _, ok := dc.mutation.Picture(); !ok {
-		return &ValidationError{Name: "picture", err: errors.New(`ent: missing required field "Destinies.picture"`)}
-	}
 	if _, ok := dc.mutation.Price(); !ok {
 		return &ValidationError{Name: "price", err: errors.New(`ent: missing required field "Destinies.price"`)}
+	}
+	if _, ok := dc.mutation.Meta(); !ok {
+		return &ValidationError{Name: "meta", err: errors.New(`ent: missing required field "Destinies.meta"`)}
+	}
+	if v, ok := dc.mutation.Meta(); ok {
+		if err := destinies.MetaValidator(v); err != nil {
+			return &ValidationError{Name: "meta", err: fmt.Errorf(`ent: validator failed for field "Destinies.meta": %w`, err)}
+		}
 	}
 	if _, ok := dc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Destinies.created_at"`)}
@@ -158,13 +186,17 @@ func (dc *DestiniesCreate) createSpec() (*Destinies, *sqlgraph.CreateSpec) {
 		_spec.SetField(destinies.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := dc.mutation.Picture(); ok {
-		_spec.SetField(destinies.FieldPicture, field.TypeString, value)
-		_node.Picture = value
-	}
 	if value, ok := dc.mutation.Price(); ok {
 		_spec.SetField(destinies.FieldPrice, field.TypeFloat64, value)
 		_node.Price = value
+	}
+	if value, ok := dc.mutation.Meta(); ok {
+		_spec.SetField(destinies.FieldMeta, field.TypeString, value)
+		_node.Meta = value
+	}
+	if value, ok := dc.mutation.Description(); ok {
+		_spec.SetField(destinies.FieldDescription, field.TypeString, value)
+		_node.Description = &value
 	}
 	if value, ok := dc.mutation.CreatedAt(); ok {
 		_spec.SetField(destinies.FieldCreatedAt, field.TypeTime, value)

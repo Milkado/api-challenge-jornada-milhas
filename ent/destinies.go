@@ -19,10 +19,12 @@ type Destinies struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// Picture holds the value of the "picture" field.
-	Picture string `json:"picture,omitempty"`
 	// Price holds the value of the "price" field.
 	Price float64 `json:"price,omitempty"`
+	// Meta holds the value of the "meta" field.
+	Meta string `json:"meta,omitempty"`
+	// Description holds the value of the "description" field.
+	Description *string `json:"description,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -39,7 +41,7 @@ func (*Destinies) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case destinies.FieldID:
 			values[i] = new(sql.NullInt64)
-		case destinies.FieldName, destinies.FieldPicture:
+		case destinies.FieldName, destinies.FieldMeta, destinies.FieldDescription:
 			values[i] = new(sql.NullString)
 		case destinies.FieldCreatedAt, destinies.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -70,17 +72,24 @@ func (d *Destinies) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				d.Name = value.String
 			}
-		case destinies.FieldPicture:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field picture", values[i])
-			} else if value.Valid {
-				d.Picture = value.String
-			}
 		case destinies.FieldPrice:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field price", values[i])
 			} else if value.Valid {
 				d.Price = value.Float64
+			}
+		case destinies.FieldMeta:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field meta", values[i])
+			} else if value.Valid {
+				d.Meta = value.String
+			}
+		case destinies.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				d.Description = new(string)
+				*d.Description = value.String
 			}
 		case destinies.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -133,11 +142,16 @@ func (d *Destinies) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(d.Name)
 	builder.WriteString(", ")
-	builder.WriteString("picture=")
-	builder.WriteString(d.Picture)
-	builder.WriteString(", ")
 	builder.WriteString("price=")
 	builder.WriteString(fmt.Sprintf("%v", d.Price))
+	builder.WriteString(", ")
+	builder.WriteString("meta=")
+	builder.WriteString(d.Meta)
+	builder.WriteString(", ")
+	if v := d.Description; v != nil {
+		builder.WriteString("description=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(d.CreatedAt.Format(time.ANSIC))

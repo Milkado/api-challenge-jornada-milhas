@@ -20,13 +20,14 @@ func main() {
 
 	if command == "" {
 		fmt.Println(helpers.Red + "--command flag missing, choose one of the avaible:" + helpers.Reset)
-		fmt.Println(helpers.Green + "migration_create, required the migration_name flag")
-		fmt.Println("migrate" + helpers.Reset)
+		fmt.Println(helpers.Green + "migration:create, required the migration_name flag")
+		fmt.Println("migrate")
+		fmt.Println("generate:secret" + helpers.Reset)
 		return
 	}
 
 	switch command {
-	case "migration_create":
+	case "migration:create":
 		atlas.CreateMigration(name)
 	case "migrate":
 		atlas.Migrate()

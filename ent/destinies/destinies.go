@@ -5,6 +5,7 @@ package destinies
 import (
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -15,10 +16,12 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldPicture holds the string denoting the picture field in the database.
-	FieldPicture = "picture"
 	// FieldPrice holds the string denoting the price field in the database.
 	FieldPrice = "price"
+	// FieldMeta holds the string denoting the meta field in the database.
+	FieldMeta = "meta"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -31,8 +34,9 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
-	FieldPicture,
 	FieldPrice,
+	FieldMeta,
+	FieldDescription,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -47,7 +51,15 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "github.com/Milkado/api-challenge-jornada-milhas/ent/runtime"
 var (
+	Hooks [1]ent.Hook
+	// MetaValidator is a validator for the "meta" field. It is called by the builders before save.
+	MetaValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -67,14 +79,19 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByPicture orders the results by the picture field.
-func ByPicture(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPicture, opts...).ToFunc()
-}
-
 // ByPrice orders the results by the price field.
 func ByPrice(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPrice, opts...).ToFunc()
+}
+
+// ByMeta orders the results by the meta field.
+func ByMeta(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMeta, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
