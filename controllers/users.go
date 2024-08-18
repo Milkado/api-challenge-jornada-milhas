@@ -5,7 +5,7 @@ import (
 
 	"github.com/Milkado/api-challenge-jornada-milhas/database"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent"
-	"github.com/Milkado/api-challenge-jornada-milhas/ent/user"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/users"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 	"github.com/Milkado/api-challenge-jornada-milhas/mail"
 	"github.com/golang-jwt/jwt/v5"
@@ -53,7 +53,7 @@ func StorePassword(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, "The password confirmation does't match")
 		}
 		token := c.Param("token")
-		userGet, uErr := client.User.Query().Where(user.PasswordToken(token)).Only(ctx)
+		userGet, uErr := client.Users.Query().Where(users.PasswordToken(token)).Only(ctx)
 
 		if uErr != nil {
 			return c.JSON(http.StatusBadRequest, uErr.Error())
@@ -90,7 +90,7 @@ func RequestNewPassword(c echo.Context) error {
 		if err := helpers.Validate(email, c); err != nil {
 			return c.JSON(http.StatusBadRequest, err)
 		}
-		userGet, getErr := client.User.Query().Where(user.Email(email.Email)).Only(ctx)
+		userGet, getErr := client.Users.Query().Where(users.Email(email.Email)).Only(ctx)
 		if getErr != nil {
 			return c.JSON(http.StatusBadRequest, getErr)
 		}

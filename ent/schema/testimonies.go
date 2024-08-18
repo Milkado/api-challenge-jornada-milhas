@@ -6,8 +6,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
-	gen "github.com/Milkado/api-challenge-jornada-milhas/ent"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/hook"
+	gen "github.com/Milkado/api-challenge-jornada-milhas/ent"
 )
 
 // Testmonies holds the schema definition for the Testmonies entity.

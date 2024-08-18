@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/Milkado/api-challenge-jornada-milhas/database"
-	"github.com/Milkado/api-challenge-jornada-milhas/ent/user"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/users"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -35,7 +35,7 @@ func Login(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	userGet, uErr := client.User.Query().Where(user.Email(credentials.Email)).Only(ctx)
+	userGet, uErr := client.Users.Query().Where(users.Email(credentials.Email)).Only(ctx)
 	if uErr != nil {
 		defer client.Close()
 		return c.JSON(http.StatusBadRequest, uErr)

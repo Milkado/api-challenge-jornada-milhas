@@ -8,15 +8,13 @@ import (
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/schema"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
-	"github.com/Milkado/api-challenge-jornada-milhas/ent/user"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/users"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	destiniesHooks := schema.Destinies{}.Hooks()
-	destinies.Hooks[0] = destiniesHooks[0]
 	destiniesFields := schema.Destinies{}.Fields()
 	_ = destiniesFields
 	// destiniesDescCreatedAt is the schema descriptor for created_at field.
@@ -39,20 +37,20 @@ func init() {
 	testimoniesDescUpdatedAt := testimoniesFields[4].Descriptor()
 	// testimonies.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	testimonies.DefaultUpdatedAt = testimoniesDescUpdatedAt.Default.(func() time.Time)
-	userFields := schema.User{}.Fields()
-	_ = userFields
-	// userDescPasswordToken is the schema descriptor for password_token field.
-	userDescPasswordToken := userFields[4].Descriptor()
-	// user.PasswordTokenValidator is a validator for the "password_token" field. It is called by the builders before save.
-	user.PasswordTokenValidator = userDescPasswordToken.Validators[0].(func(string) error)
-	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[5].Descriptor()
-	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
-	user.DefaultCreatedAt = userDescCreatedAt.Default.(time.Time)
-	// userDescUpdatedAt is the schema descriptor for updated_at field.
-	userDescUpdatedAt := userFields[6].Descriptor()
-	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(time.Time)
+	usersFields := schema.Users{}.Fields()
+	_ = usersFields
+	// usersDescPasswordToken is the schema descriptor for password_token field.
+	usersDescPasswordToken := usersFields[4].Descriptor()
+	// users.PasswordTokenValidator is a validator for the "password_token" field. It is called by the builders before save.
+	users.PasswordTokenValidator = usersDescPasswordToken.Validators[0].(func(string) error)
+	// usersDescCreatedAt is the schema descriptor for created_at field.
+	usersDescCreatedAt := usersFields[5].Descriptor()
+	// users.DefaultCreatedAt holds the default value on creation for the created_at field.
+	users.DefaultCreatedAt = usersDescCreatedAt.Default.(time.Time)
+	// usersDescUpdatedAt is the schema descriptor for updated_at field.
+	usersDescUpdatedAt := usersFields[6].Descriptor()
+	// users.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	users.DefaultUpdatedAt = usersDescUpdatedAt.Default.(time.Time)
 }
 
 const (

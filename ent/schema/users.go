@@ -8,12 +8,12 @@ import (
 )
 
 // User holds the schema definition for the User entity.
-type User struct {
+type Users struct {
 	ent.Schema
 }
 
 // Fields of the User.
-func (User) Fields() []ent.Field {
+func (Users) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
 		field.String("email").Unique(),
@@ -26,6 +26,6 @@ func (User) Fields() []ent.Field {
 }
 
 // Edges of the User.
-func (User) Edges() []ent.Edge {
+func (Users) Edges() []ent.Edge {
 	return nil
 }

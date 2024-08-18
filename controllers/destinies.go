@@ -15,7 +15,7 @@ import (
 
 type (
 	Destinies struct {
-		Name    string  `json:"name" xml:"name" form:"name" query:"name" validate:"required,min=1"`
+		Name    string  `json:"name" xml:"name" form:"name" validate:"required,min=1"`
 		Price   float64 `json:"price" xml:"price" form:"price" validate:"required,numeric"`
 		Picture string  `json:"picture" xml:"picture" form:"picture" validate:"required"`
 	}
@@ -27,23 +27,8 @@ type (
 
 func IndexDestinies(c echo.Context) error {
 	client := database.ConnectDB()
-	defer client.Close()
-	if c.QueryString() != "" {
-		var name Destinies
-		err := c.Bind(&name)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, err)
-		}
-		destinies, err := client.Destinies.Query().Where(destinies.NameContainsFold(name.Name)).All(ctx)
-
-		if err != nil {
-			c.JSON(http.StatusAccepted, err)
-		}
-
-		return c.JSON(http.StatusOK, destinies)
-	}
-
 	destinies, err := client.Destinies.Query().All(ctx)
+	defer client.Close()
 	if err != nil {
 		c.JSON(http.StatusAccepted, err)
 	}
