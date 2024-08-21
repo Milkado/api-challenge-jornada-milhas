@@ -34,20 +34,23 @@ const (
 // DestiniesMutation represents an operation that mutates the Destinies nodes in the graph.
 type DestiniesMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	name          *string
-	price         *float64
-	addprice      *float64
-	meta          *string
-	description   *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Destinies, error)
-	predicates    []predicate.Destinies
+	op                 Op
+	typ                string
+	id                 *int
+	name               *string
+	price              *float64
+	addprice           *float64
+	meta               *string
+	description        *string
+	created_at         *time.Time
+	updated_at         *time.Time
+	clearedFields      map[string]struct{}
+	testimonies        map[int]struct{}
+	removedtestimonies map[int]struct{}
+	clearedtestimonies bool
+	done               bool
+	oldValue           func(context.Context) (*Destinies, error)
+	predicates         []predicate.Destinies
 }
 
 var _ ent.Mutation = (*DestiniesMutation)(nil)
@@ -397,6 +400,60 @@ func (m *DestiniesMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// AddTestimonyIDs adds the "testimonies" edge to the Testimonies entity by ids.
+func (m *DestiniesMutation) AddTestimonyIDs(ids ...int) {
+	if m.testimonies == nil {
+		m.testimonies = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.testimonies[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTestimonies clears the "testimonies" edge to the Testimonies entity.
+func (m *DestiniesMutation) ClearTestimonies() {
+	m.clearedtestimonies = true
+}
+
+// TestimoniesCleared reports if the "testimonies" edge to the Testimonies entity was cleared.
+func (m *DestiniesMutation) TestimoniesCleared() bool {
+	return m.clearedtestimonies
+}
+
+// RemoveTestimonyIDs removes the "testimonies" edge to the Testimonies entity by IDs.
+func (m *DestiniesMutation) RemoveTestimonyIDs(ids ...int) {
+	if m.removedtestimonies == nil {
+		m.removedtestimonies = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.testimonies, ids[i])
+		m.removedtestimonies[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTestimonies returns the removed IDs of the "testimonies" edge to the Testimonies entity.
+func (m *DestiniesMutation) RemovedTestimoniesIDs() (ids []int) {
+	for id := range m.removedtestimonies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TestimoniesIDs returns the "testimonies" edge IDs in the mutation.
+func (m *DestiniesMutation) TestimoniesIDs() (ids []int) {
+	for id := range m.testimonies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTestimonies resets all changes to the "testimonies" edge.
+func (m *DestiniesMutation) ResetTestimonies() {
+	m.testimonies = nil
+	m.clearedtestimonies = false
+	m.removedtestimonies = nil
+}
+
 // Where appends a list predicates to the DestiniesMutation builder.
 func (m *DestiniesMutation) Where(ps ...predicate.Destinies) {
 	m.predicates = append(m.predicates, ps...)
@@ -639,67 +696,105 @@ func (m *DestiniesMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DestiniesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.testimonies != nil {
+		edges = append(edges, destinies.EdgeTestimonies)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *DestiniesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case destinies.EdgeTestimonies:
+		ids := make([]ent.Value, 0, len(m.testimonies))
+		for id := range m.testimonies {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DestiniesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedtestimonies != nil {
+		edges = append(edges, destinies.EdgeTestimonies)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *DestiniesMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case destinies.EdgeTestimonies:
+		ids := make([]ent.Value, 0, len(m.removedtestimonies))
+		for id := range m.removedtestimonies {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DestiniesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedtestimonies {
+		edges = append(edges, destinies.EdgeTestimonies)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *DestiniesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case destinies.EdgeTestimonies:
+		return m.clearedtestimonies
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *DestiniesMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Destinies unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *DestiniesMutation) ResetEdge(name string) error {
+	switch name {
+	case destinies.EdgeTestimonies:
+		m.ResetTestimonies()
+		return nil
+	}
 	return fmt.Errorf("unknown Destinies edge %s", name)
 }
 
 // TestimoniesMutation represents an operation that mutates the Testimonies nodes in the graph.
 type TestimoniesMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	testimony     *string
-	name          *string
-	picture       *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Testimonies, error)
-	predicates    []predicate.Testimonies
+	op               Op
+	typ              string
+	id               *int
+	testimony        *string
+	name             *string
+	picture          *string
+	created_at       *time.Time
+	updated_at       *time.Time
+	clearedFields    map[string]struct{}
+	destinies        *int
+	cleareddestinies bool
+	done             bool
+	oldValue         func(context.Context) (*Testimonies, error)
+	predicates       []predicate.Testimonies
 }
 
 var _ ent.Mutation = (*TestimoniesMutation)(nil)
@@ -908,6 +1003,42 @@ func (m *TestimoniesMutation) ResetPicture() {
 	m.picture = nil
 }
 
+// SetDestinyID sets the "destiny_id" field.
+func (m *TestimoniesMutation) SetDestinyID(i int) {
+	m.destinies = &i
+}
+
+// DestinyID returns the value of the "destiny_id" field in the mutation.
+func (m *TestimoniesMutation) DestinyID() (r int, exists bool) {
+	v := m.destinies
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDestinyID returns the old "destiny_id" field's value of the Testimonies entity.
+// If the Testimonies object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TestimoniesMutation) OldDestinyID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDestinyID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDestinyID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDestinyID: %w", err)
+	}
+	return oldValue.DestinyID, nil
+}
+
+// ResetDestinyID resets all changes to the "destiny_id" field.
+func (m *TestimoniesMutation) ResetDestinyID() {
+	m.destinies = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *TestimoniesMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -980,6 +1111,46 @@ func (m *TestimoniesMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// SetDestiniesID sets the "destinies" edge to the Destinies entity by id.
+func (m *TestimoniesMutation) SetDestiniesID(id int) {
+	m.destinies = &id
+}
+
+// ClearDestinies clears the "destinies" edge to the Destinies entity.
+func (m *TestimoniesMutation) ClearDestinies() {
+	m.cleareddestinies = true
+	m.clearedFields[testimonies.FieldDestinyID] = struct{}{}
+}
+
+// DestiniesCleared reports if the "destinies" edge to the Destinies entity was cleared.
+func (m *TestimoniesMutation) DestiniesCleared() bool {
+	return m.cleareddestinies
+}
+
+// DestiniesID returns the "destinies" edge ID in the mutation.
+func (m *TestimoniesMutation) DestiniesID() (id int, exists bool) {
+	if m.destinies != nil {
+		return *m.destinies, true
+	}
+	return
+}
+
+// DestiniesIDs returns the "destinies" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DestiniesID instead. It exists only for internal usage by the builders.
+func (m *TestimoniesMutation) DestiniesIDs() (ids []int) {
+	if id := m.destinies; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDestinies resets all changes to the "destinies" edge.
+func (m *TestimoniesMutation) ResetDestinies() {
+	m.destinies = nil
+	m.cleareddestinies = false
+}
+
 // Where appends a list predicates to the TestimoniesMutation builder.
 func (m *TestimoniesMutation) Where(ps ...predicate.Testimonies) {
 	m.predicates = append(m.predicates, ps...)
@@ -1014,7 +1185,7 @@ func (m *TestimoniesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TestimoniesMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.testimony != nil {
 		fields = append(fields, testimonies.FieldTestimony)
 	}
@@ -1023,6 +1194,9 @@ func (m *TestimoniesMutation) Fields() []string {
 	}
 	if m.picture != nil {
 		fields = append(fields, testimonies.FieldPicture)
+	}
+	if m.destinies != nil {
+		fields = append(fields, testimonies.FieldDestinyID)
 	}
 	if m.created_at != nil {
 		fields = append(fields, testimonies.FieldCreatedAt)
@@ -1044,6 +1218,8 @@ func (m *TestimoniesMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case testimonies.FieldPicture:
 		return m.Picture()
+	case testimonies.FieldDestinyID:
+		return m.DestinyID()
 	case testimonies.FieldCreatedAt:
 		return m.CreatedAt()
 	case testimonies.FieldUpdatedAt:
@@ -1063,6 +1239,8 @@ func (m *TestimoniesMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldName(ctx)
 	case testimonies.FieldPicture:
 		return m.OldPicture(ctx)
+	case testimonies.FieldDestinyID:
+		return m.OldDestinyID(ctx)
 	case testimonies.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case testimonies.FieldUpdatedAt:
@@ -1097,6 +1275,13 @@ func (m *TestimoniesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPicture(v)
 		return nil
+	case testimonies.FieldDestinyID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDestinyID(v)
+		return nil
 	case testimonies.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -1118,13 +1303,16 @@ func (m *TestimoniesMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TestimoniesMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TestimoniesMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -1169,6 +1357,9 @@ func (m *TestimoniesMutation) ResetField(name string) error {
 	case testimonies.FieldPicture:
 		m.ResetPicture()
 		return nil
+	case testimonies.FieldDestinyID:
+		m.ResetDestinyID()
+		return nil
 	case testimonies.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
@@ -1181,19 +1372,28 @@ func (m *TestimoniesMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TestimoniesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.destinies != nil {
+		edges = append(edges, testimonies.EdgeDestinies)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *TestimoniesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case testimonies.EdgeDestinies:
+		if id := m.destinies; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TestimoniesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -1205,25 +1405,42 @@ func (m *TestimoniesMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TestimoniesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.cleareddestinies {
+		edges = append(edges, testimonies.EdgeDestinies)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *TestimoniesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case testimonies.EdgeDestinies:
+		return m.cleareddestinies
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *TestimoniesMutation) ClearEdge(name string) error {
+	switch name {
+	case testimonies.EdgeDestinies:
+		m.ClearDestinies()
+		return nil
+	}
 	return fmt.Errorf("unknown Testimonies unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *TestimoniesMutation) ResetEdge(name string) error {
+	switch name {
+	case testimonies.EdgeDestinies:
+		m.ResetDestinies()
+		return nil
+	}
 	return fmt.Errorf("unknown Testimonies edge %s", name)
 }
 

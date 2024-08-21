@@ -7,6 +7,7 @@ import (
 	"github.com/Milkado/api-challenge-jornada-milhas/database"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 	"github.com/labstack/echo/v4"
 )
@@ -25,14 +26,24 @@ func IndexDestinies(c echo.Context) error {
 	defer client.Close()
 
 	if c.QueryString() != "" {
-		destinies, err := client.Destinies.Query().Where(destinies.NameContainsFold(c.QueryParam("name"))).All(ctx)
+		destinies, err := client.Destinies.Query().Where(destinies.NameContainsFold(c.QueryParam("name"))).WithTestimonies(
+			func(q *ent.TestimoniesQuery) {
+				q.Limit(3)
+				q.Order(ent.Desc(testimonies.FieldCreatedAt))
+			},
+		).All(ctx)
 		if err != nil {
 			c.JSON(http.StatusAccepted, err)
 		}
 		return c.JSON(http.StatusOK, destinies)
 	}
 
-	destinies, err := client.Destinies.Query().All(ctx)
+	destinies, err := client.Destinies.Query().WithTestimonies(
+		func(q *ent.TestimoniesQuery) {
+			q.Limit(3)
+			q.Order(ent.Desc(testimonies.FieldCreatedAt))
+		},
+	).All(ctx)
 	defer client.Close()
 	if err != nil {
 		c.JSON(http.StatusAccepted, err)
@@ -49,7 +60,12 @@ func ShowDestinies(c echo.Context) error {
 
 	client := database.ConnectDB()
 	defer client.Close()
-	destiny, sErr := client.Destinies.Query().Where(destinies.ID(id)).Only(ctx)
+	destiny, sErr := client.Destinies.Query().Where(destinies.ID(id)).WithTestimonies(
+		func(q *ent.TestimoniesQuery) {
+			q.Limit(5)
+			q.Order(ent.Desc(testimonies.FieldCreatedAt))
+		},
+	).Only(ctx)
 
 	if sErr != nil {
 		if ent.IsNotFound(sErr) {

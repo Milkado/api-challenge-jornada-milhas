@@ -18,17 +18,21 @@ type (
 		Testimony string `json:"testimony" xml:"testimony" form:"testimony" validate:"required,min=1"`
 		Name      string `json:"name" xml:"name" form:"name" validate:"required,min=1"`
 		Picture   string `json:"picture" xml:"picture" form:"picture" validate:"required"`
+		DestinyID int    `json:"destiny_id" xml:"destiny_id" form:"destiny_id" validate:"required"`
 	}
 	TestimoniesUpdate struct {
 		Testimony string `json:"testimony" xml:"testimony" form:"testimony" validate:"required,min=1"`
 		Name      string `json:"name" xml:"name" form:"name" validate:"required,min=1"`
+		DestinyID int    `json:"destiny_id" xml:"destiny_id" form:"destiny_id" validate:"required"`
 	}
 )
 
 func IndexTestimonies(c echo.Context) error {
 	client := database.ConnectDB()
-	testimonies, err := client.Testimonies.Query().All(ctx)
 	defer client.Close()
+
+	testimonies, err := client.Testimonies.Query().WithDestinies().All(ctx)
+
 	if err != nil {
 		return err
 	}
@@ -43,7 +47,8 @@ func ShowTestimony(c echo.Context) error {
 	}
 
 	client := database.ConnectDB()
-	testimony, err := client.Testimonies.Query().Where(testimonies.ID(id)).Only(ctx)
+	defer client.Close()
+	testimony, err := client.Testimonies.Query().Where(testimonies.ID(id)).WithDestinies().Only(ctx)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
@@ -55,6 +60,7 @@ func ShowTestimony(c echo.Context) error {
 func StoreTestimony(c echo.Context) error {
 
 	client := database.ConnectDB()
+	defer client.Close()
 
 	if err := withTx(ctx, client, func(tx *ent.Tx) error {
 		t := new(Testimonies)
@@ -65,9 +71,13 @@ func StoreTestimony(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
+		if !checkIfDestinyExists(c, t.DestinyID) {
+			return c.JSON(http.StatusBadRequest, "Destiny does not exist")
+		}
+
 		picture := uuid.New().String() + time.Now().Format("2006-01-02")
 
-		newTestimony, err := tx.Testimonies.Create().SetTestimony(t.Testimony).SetName(t.Name).SetPicture(picture).Save(ctx)
+		newTestimony, err := tx.Testimonies.Create().SetTestimony(t.Testimony).SetName(t.Name).SetPicture(picture).SetDestinyID(t.DestinyID).Save(ctx)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
@@ -77,14 +87,14 @@ func StoreTestimony(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	defer client.Close()
 	return nil
 }
 
 func ChangeTestimony(c echo.Context) error {
 	client := database.ConnectDB()
+	defer client.Close()
 
-	if err := withTx(ctx, client, func (tx *ent.Tx) error {
+	if err := withTx(ctx, client, func(tx *ent.Tx) error {
 		id, cErr := strconv.Atoi(c.Param("id"))
 		if cErr != nil {
 			return c.JSON(http.StatusInternalServerError, cErr)
@@ -104,12 +114,12 @@ func ChangeTestimony(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	defer client.Close()
 	return nil
 }
 
 func DeleteTestimony(c echo.Context) error {
 	client := database.ConnectDB()
+	defer client.Close()
 
 	if err := withTx(ctx, client, func(tx *ent.Tx) error {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -128,6 +138,5 @@ func DeleteTestimony(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	defer client.Close()
 	return nil
 }

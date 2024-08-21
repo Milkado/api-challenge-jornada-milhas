@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/predicate"
 )
 
@@ -67,6 +68,11 @@ func Name(v string) predicate.Testimonies {
 // Picture applies equality check predicate on the "picture" field. It's identical to PictureEQ.
 func Picture(v string) predicate.Testimonies {
 	return predicate.Testimonies(sql.FieldEQ(FieldPicture, v))
+}
+
+// DestinyID applies equality check predicate on the "destiny_id" field. It's identical to DestinyIDEQ.
+func DestinyID(v int) predicate.Testimonies {
+	return predicate.Testimonies(sql.FieldEQ(FieldDestinyID, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -274,6 +280,26 @@ func PictureContainsFold(v string) predicate.Testimonies {
 	return predicate.Testimonies(sql.FieldContainsFold(FieldPicture, v))
 }
 
+// DestinyIDEQ applies the EQ predicate on the "destiny_id" field.
+func DestinyIDEQ(v int) predicate.Testimonies {
+	return predicate.Testimonies(sql.FieldEQ(FieldDestinyID, v))
+}
+
+// DestinyIDNEQ applies the NEQ predicate on the "destiny_id" field.
+func DestinyIDNEQ(v int) predicate.Testimonies {
+	return predicate.Testimonies(sql.FieldNEQ(FieldDestinyID, v))
+}
+
+// DestinyIDIn applies the In predicate on the "destiny_id" field.
+func DestinyIDIn(vs ...int) predicate.Testimonies {
+	return predicate.Testimonies(sql.FieldIn(FieldDestinyID, vs...))
+}
+
+// DestinyIDNotIn applies the NotIn predicate on the "destiny_id" field.
+func DestinyIDNotIn(vs ...int) predicate.Testimonies {
+	return predicate.Testimonies(sql.FieldNotIn(FieldDestinyID, vs...))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Testimonies {
 	return predicate.Testimonies(sql.FieldEQ(FieldCreatedAt, v))
@@ -352,6 +378,29 @@ func UpdatedAtLT(v time.Time) predicate.Testimonies {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Testimonies {
 	return predicate.Testimonies(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// HasDestinies applies the HasEdge predicate on the "destinies" edge.
+func HasDestinies() predicate.Testimonies {
+	return predicate.Testimonies(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, DestiniesTable, DestiniesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDestiniesWith applies the HasEdge predicate on the "destinies" edge with a given conditions (other predicates).
+func HasDestiniesWith(preds ...predicate.Destinies) predicate.Testimonies {
+	return predicate.Testimonies(func(s *sql.Selector) {
+		step := newDestiniesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

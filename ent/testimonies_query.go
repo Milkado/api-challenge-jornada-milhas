@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/predicate"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 )
@@ -17,10 +18,11 @@ import (
 // TestimoniesQuery is the builder for querying Testimonies entities.
 type TestimoniesQuery struct {
 	config
-	ctx        *QueryContext
-	order      []testimonies.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Testimonies
+	ctx           *QueryContext
+	order         []testimonies.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.Testimonies
+	withDestinies *DestiniesQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -55,6 +57,28 @@ func (tq *TestimoniesQuery) Unique(unique bool) *TestimoniesQuery {
 func (tq *TestimoniesQuery) Order(o ...testimonies.OrderOption) *TestimoniesQuery {
 	tq.order = append(tq.order, o...)
 	return tq
+}
+
+// QueryDestinies chains the current query on the "destinies" edge.
+func (tq *TestimoniesQuery) QueryDestinies() *DestiniesQuery {
+	query := (&DestiniesClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(testimonies.Table, testimonies.FieldID, selector),
+			sqlgraph.To(destinies.Table, destinies.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, testimonies.DestiniesTable, testimonies.DestiniesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Testimonies entity from the query.
@@ -244,15 +268,27 @@ func (tq *TestimoniesQuery) Clone() *TestimoniesQuery {
 		return nil
 	}
 	return &TestimoniesQuery{
-		config:     tq.config,
-		ctx:        tq.ctx.Clone(),
-		order:      append([]testimonies.OrderOption{}, tq.order...),
-		inters:     append([]Interceptor{}, tq.inters...),
-		predicates: append([]predicate.Testimonies{}, tq.predicates...),
+		config:        tq.config,
+		ctx:           tq.ctx.Clone(),
+		order:         append([]testimonies.OrderOption{}, tq.order...),
+		inters:        append([]Interceptor{}, tq.inters...),
+		predicates:    append([]predicate.Testimonies{}, tq.predicates...),
+		withDestinies: tq.withDestinies.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
 	}
+}
+
+// WithDestinies tells the query-builder to eager-load the nodes that are connected to
+// the "destinies" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TestimoniesQuery) WithDestinies(opts ...func(*DestiniesQuery)) *TestimoniesQuery {
+	query := (&DestiniesClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withDestinies = query
+	return tq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -331,8 +367,11 @@ func (tq *TestimoniesQuery) prepareQuery(ctx context.Context) error {
 
 func (tq *TestimoniesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Testimonies, error) {
 	var (
-		nodes = []*Testimonies{}
-		_spec = tq.querySpec()
+		nodes       = []*Testimonies{}
+		_spec       = tq.querySpec()
+		loadedTypes = [1]bool{
+			tq.withDestinies != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Testimonies).scanValues(nil, columns)
@@ -340,6 +379,7 @@ func (tq *TestimoniesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Testimonies{config: tq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -351,7 +391,43 @@ func (tq *TestimoniesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := tq.withDestinies; query != nil {
+		if err := tq.loadDestinies(ctx, query, nodes, nil,
+			func(n *Testimonies, e *Destinies) { n.Edges.Destinies = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (tq *TestimoniesQuery) loadDestinies(ctx context.Context, query *DestiniesQuery, nodes []*Testimonies, init func(*Testimonies), assign func(*Testimonies, *Destinies)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Testimonies)
+	for i := range nodes {
+		fk := nodes[i].DestinyID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(destinies.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "destiny_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (tq *TestimoniesQuery) sqlCount(ctx context.Context) (int, error) {
@@ -378,6 +454,9 @@ func (tq *TestimoniesQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != testimonies.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if tq.withDestinies != nil {
+			_spec.Node.AddColumnOnce(testimonies.FieldDestinyID)
 		}
 	}
 	if ps := tq.predicates; len(ps) > 0 {

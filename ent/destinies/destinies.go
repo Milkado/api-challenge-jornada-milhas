@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -26,8 +27,17 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// EdgeTestimonies holds the string denoting the testimonies edge name in mutations.
+	EdgeTestimonies = "testimonies"
 	// Table holds the table name of the destinies in the database.
 	Table = "destinies"
+	// TestimoniesTable is the table that holds the testimonies relation/edge.
+	TestimoniesTable = "testimonies"
+	// TestimoniesInverseTable is the table name for the Testimonies entity.
+	// It exists in this package in order to avoid circular dependency with the "testimonies" package.
+	TestimoniesInverseTable = "testimonies"
+	// TestimoniesColumn is the table column denoting the testimonies relation/edge.
+	TestimoniesColumn = "destiny_id"
 )
 
 // Columns holds all SQL columns for destinies fields.
@@ -102,4 +112,25 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByTestimoniesCount orders the results by testimonies count.
+func ByTestimoniesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTestimoniesStep(), opts...)
+	}
+}
+
+// ByTestimonies orders the results by testimonies terms.
+func ByTestimonies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTestimoniesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newTestimoniesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TestimoniesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TestimoniesTable, TestimoniesColumn),
+	)
 }

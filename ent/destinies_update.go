@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/predicate"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 )
 
 // DestiniesUpdate is the builder for updating Destinies entities.
@@ -125,9 +126,45 @@ func (du *DestiniesUpdate) SetNillableUpdatedAt(t *time.Time) *DestiniesUpdate {
 	return du
 }
 
+// AddTestimonyIDs adds the "testimonies" edge to the Testimonies entity by IDs.
+func (du *DestiniesUpdate) AddTestimonyIDs(ids ...int) *DestiniesUpdate {
+	du.mutation.AddTestimonyIDs(ids...)
+	return du
+}
+
+// AddTestimonies adds the "testimonies" edges to the Testimonies entity.
+func (du *DestiniesUpdate) AddTestimonies(t ...*Testimonies) *DestiniesUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return du.AddTestimonyIDs(ids...)
+}
+
 // Mutation returns the DestiniesMutation object of the builder.
 func (du *DestiniesUpdate) Mutation() *DestiniesMutation {
 	return du.mutation
+}
+
+// ClearTestimonies clears all "testimonies" edges to the Testimonies entity.
+func (du *DestiniesUpdate) ClearTestimonies() *DestiniesUpdate {
+	du.mutation.ClearTestimonies()
+	return du
+}
+
+// RemoveTestimonyIDs removes the "testimonies" edge to Testimonies entities by IDs.
+func (du *DestiniesUpdate) RemoveTestimonyIDs(ids ...int) *DestiniesUpdate {
+	du.mutation.RemoveTestimonyIDs(ids...)
+	return du
+}
+
+// RemoveTestimonies removes "testimonies" edges to Testimonies entities.
+func (du *DestiniesUpdate) RemoveTestimonies(t ...*Testimonies) *DestiniesUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return du.RemoveTestimonyIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -202,6 +239,51 @@ func (du *DestiniesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := du.mutation.UpdatedAt(); ok {
 		_spec.SetField(destinies.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if du.mutation.TestimoniesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.TestimoniesTable,
+			Columns: []string{destinies.TestimoniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.RemovedTestimoniesIDs(); len(nodes) > 0 && !du.mutation.TestimoniesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.TestimoniesTable,
+			Columns: []string{destinies.TestimoniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.TestimoniesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.TestimoniesTable,
+			Columns: []string{destinies.TestimoniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -320,9 +402,45 @@ func (duo *DestiniesUpdateOne) SetNillableUpdatedAt(t *time.Time) *DestiniesUpda
 	return duo
 }
 
+// AddTestimonyIDs adds the "testimonies" edge to the Testimonies entity by IDs.
+func (duo *DestiniesUpdateOne) AddTestimonyIDs(ids ...int) *DestiniesUpdateOne {
+	duo.mutation.AddTestimonyIDs(ids...)
+	return duo
+}
+
+// AddTestimonies adds the "testimonies" edges to the Testimonies entity.
+func (duo *DestiniesUpdateOne) AddTestimonies(t ...*Testimonies) *DestiniesUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return duo.AddTestimonyIDs(ids...)
+}
+
 // Mutation returns the DestiniesMutation object of the builder.
 func (duo *DestiniesUpdateOne) Mutation() *DestiniesMutation {
 	return duo.mutation
+}
+
+// ClearTestimonies clears all "testimonies" edges to the Testimonies entity.
+func (duo *DestiniesUpdateOne) ClearTestimonies() *DestiniesUpdateOne {
+	duo.mutation.ClearTestimonies()
+	return duo
+}
+
+// RemoveTestimonyIDs removes the "testimonies" edge to Testimonies entities by IDs.
+func (duo *DestiniesUpdateOne) RemoveTestimonyIDs(ids ...int) *DestiniesUpdateOne {
+	duo.mutation.RemoveTestimonyIDs(ids...)
+	return duo
+}
+
+// RemoveTestimonies removes "testimonies" edges to Testimonies entities.
+func (duo *DestiniesUpdateOne) RemoveTestimonies(t ...*Testimonies) *DestiniesUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return duo.RemoveTestimonyIDs(ids...)
 }
 
 // Where appends a list predicates to the DestiniesUpdate builder.
@@ -427,6 +545,51 @@ func (duo *DestiniesUpdateOne) sqlSave(ctx context.Context) (_node *Destinies, e
 	}
 	if value, ok := duo.mutation.UpdatedAt(); ok {
 		_spec.SetField(destinies.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if duo.mutation.TestimoniesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.TestimoniesTable,
+			Columns: []string{destinies.TestimoniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.RemovedTestimoniesIDs(); len(nodes) > 0 && !duo.mutation.TestimoniesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.TestimoniesTable,
+			Columns: []string{destinies.TestimoniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.TestimoniesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.TestimoniesTable,
+			Columns: []string{destinies.TestimoniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Destinies{config: duo.config}
 	_spec.Assign = _node.assignValues

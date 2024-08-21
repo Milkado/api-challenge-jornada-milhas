@@ -5,9 +5,11 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/Milkado/api-challenge-jornada-milhas/ent/hook"
 	gen "github.com/Milkado/api-challenge-jornada-milhas/ent"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/hook"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 )
 
 // Destinies holds the schema definition for the Destinies entity.
@@ -29,7 +31,9 @@ func (Destinies) Fields() []ent.Field {
 
 // Edges of the Destinies.
 func (Destinies) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("testimonies", Testimonies.Type),
+	}
 }
 
 // Hooks of the Destinies.
@@ -46,6 +50,19 @@ func (Destinies) Hooks() []ent.Hook {
 				})
 			},
 			ent.OpUpdate|ent.OpUpdateOne,
+		),
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.DestiniesFunc(func(ctx context.Context, m *gen.DestiniesMutation) (ent.Value, error) {
+					client := gen.NewClient()
+					id, _ := m.ID()
+					
+					client.Testimonies.Delete().Where(testimonies.DestinyID(id)).Exec(ctx)
+
+					return next.Mutate(ctx, m)
+				})
+		},
+			ent.OpDelete|ent.OpDeleteOne,
 		),
 	}
 }

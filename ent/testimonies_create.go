@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 )
 
@@ -35,6 +36,12 @@ func (tc *TestimoniesCreate) SetName(s string) *TestimoniesCreate {
 // SetPicture sets the "picture" field.
 func (tc *TestimoniesCreate) SetPicture(s string) *TestimoniesCreate {
 	tc.mutation.SetPicture(s)
+	return tc
+}
+
+// SetDestinyID sets the "destiny_id" field.
+func (tc *TestimoniesCreate) SetDestinyID(i int) *TestimoniesCreate {
+	tc.mutation.SetDestinyID(i)
 	return tc
 }
 
@@ -64,6 +71,17 @@ func (tc *TestimoniesCreate) SetNillableUpdatedAt(t *time.Time) *TestimoniesCrea
 		tc.SetUpdatedAt(*t)
 	}
 	return tc
+}
+
+// SetDestiniesID sets the "destinies" edge to the Destinies entity by ID.
+func (tc *TestimoniesCreate) SetDestiniesID(id int) *TestimoniesCreate {
+	tc.mutation.SetDestiniesID(id)
+	return tc
+}
+
+// SetDestinies sets the "destinies" edge to the Destinies entity.
+func (tc *TestimoniesCreate) SetDestinies(d *Destinies) *TestimoniesCreate {
+	return tc.SetDestiniesID(d.ID)
 }
 
 // Mutation returns the TestimoniesMutation object of the builder.
@@ -131,11 +149,17 @@ func (tc *TestimoniesCreate) check() error {
 	if _, ok := tc.mutation.Picture(); !ok {
 		return &ValidationError{Name: "picture", err: errors.New(`ent: missing required field "Testimonies.picture"`)}
 	}
+	if _, ok := tc.mutation.DestinyID(); !ok {
+		return &ValidationError{Name: "destiny_id", err: errors.New(`ent: missing required field "Testimonies.destiny_id"`)}
+	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Testimonies.created_at"`)}
 	}
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Testimonies.updated_at"`)}
+	}
+	if _, ok := tc.mutation.DestiniesID(); !ok {
+		return &ValidationError{Name: "destinies", err: errors.New(`ent: missing required edge "Testimonies.destinies"`)}
 	}
 	return nil
 }
@@ -182,6 +206,23 @@ func (tc *TestimoniesCreate) createSpec() (*Testimonies, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.UpdatedAt(); ok {
 		_spec.SetField(testimonies.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if nodes := tc.mutation.DestiniesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   testimonies.DestiniesTable,
+			Columns: []string{testimonies.DestiniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.DestinyID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

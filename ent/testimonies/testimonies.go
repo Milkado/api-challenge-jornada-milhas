@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -20,12 +21,23 @@ const (
 	FieldName = "name"
 	// FieldPicture holds the string denoting the picture field in the database.
 	FieldPicture = "picture"
+	// FieldDestinyID holds the string denoting the destiny_id field in the database.
+	FieldDestinyID = "destiny_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// EdgeDestinies holds the string denoting the destinies edge name in mutations.
+	EdgeDestinies = "destinies"
 	// Table holds the table name of the testimonies in the database.
 	Table = "testimonies"
+	// DestiniesTable is the table that holds the destinies relation/edge.
+	DestiniesTable = "testimonies"
+	// DestiniesInverseTable is the table name for the Destinies entity.
+	// It exists in this package in order to avoid circular dependency with the "destinies" package.
+	DestiniesInverseTable = "destinies"
+	// DestiniesColumn is the table column denoting the destinies relation/edge.
+	DestiniesColumn = "destiny_id"
 )
 
 // Columns holds all SQL columns for testimonies fields.
@@ -34,6 +46,7 @@ var Columns = []string{
 	FieldTestimony,
 	FieldName,
 	FieldPicture,
+	FieldDestinyID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -84,6 +97,11 @@ func ByPicture(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPicture, opts...).ToFunc()
 }
 
+// ByDestinyID orders the results by the destiny_id field.
+func ByDestinyID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDestinyID, opts...).ToFunc()
+}
+
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
@@ -92,4 +110,18 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDestiniesField orders the results by destinies field.
+func ByDestiniesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDestiniesStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newDestiniesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DestiniesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, DestiniesTable, DestiniesColumn),
+	)
 }

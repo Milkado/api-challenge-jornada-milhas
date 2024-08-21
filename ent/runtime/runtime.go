@@ -36,11 +36,11 @@ func init() {
 	testimoniesFields := schema.Testimonies{}.Fields()
 	_ = testimoniesFields
 	// testimoniesDescCreatedAt is the schema descriptor for created_at field.
-	testimoniesDescCreatedAt := testimoniesFields[3].Descriptor()
+	testimoniesDescCreatedAt := testimoniesFields[4].Descriptor()
 	// testimonies.DefaultCreatedAt holds the default value on creation for the created_at field.
 	testimonies.DefaultCreatedAt = testimoniesDescCreatedAt.Default.(func() time.Time)
 	// testimoniesDescUpdatedAt is the schema descriptor for updated_at field.
-	testimoniesDescUpdatedAt := testimoniesFields[4].Descriptor()
+	testimoniesDescUpdatedAt := testimoniesFields[5].Descriptor()
 	// testimonies.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	testimonies.DefaultUpdatedAt = testimoniesDescUpdatedAt.Default.(func() time.Time)
 	usersFields := schema.Users{}.Fields()

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/predicate"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 )
@@ -70,6 +71,20 @@ func (tu *TestimoniesUpdate) SetNillablePicture(s *string) *TestimoniesUpdate {
 	return tu
 }
 
+// SetDestinyID sets the "destiny_id" field.
+func (tu *TestimoniesUpdate) SetDestinyID(i int) *TestimoniesUpdate {
+	tu.mutation.SetDestinyID(i)
+	return tu
+}
+
+// SetNillableDestinyID sets the "destiny_id" field if the given value is not nil.
+func (tu *TestimoniesUpdate) SetNillableDestinyID(i *int) *TestimoniesUpdate {
+	if i != nil {
+		tu.SetDestinyID(*i)
+	}
+	return tu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (tu *TestimoniesUpdate) SetCreatedAt(t time.Time) *TestimoniesUpdate {
 	tu.mutation.SetCreatedAt(t)
@@ -98,9 +113,26 @@ func (tu *TestimoniesUpdate) SetNillableUpdatedAt(t *time.Time) *TestimoniesUpda
 	return tu
 }
 
+// SetDestiniesID sets the "destinies" edge to the Destinies entity by ID.
+func (tu *TestimoniesUpdate) SetDestiniesID(id int) *TestimoniesUpdate {
+	tu.mutation.SetDestiniesID(id)
+	return tu
+}
+
+// SetDestinies sets the "destinies" edge to the Destinies entity.
+func (tu *TestimoniesUpdate) SetDestinies(d *Destinies) *TestimoniesUpdate {
+	return tu.SetDestiniesID(d.ID)
+}
+
 // Mutation returns the TestimoniesMutation object of the builder.
 func (tu *TestimoniesUpdate) Mutation() *TestimoniesMutation {
 	return tu.mutation
+}
+
+// ClearDestinies clears the "destinies" edge to the Destinies entity.
+func (tu *TestimoniesUpdate) ClearDestinies() *TestimoniesUpdate {
+	tu.mutation.ClearDestinies()
+	return tu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -130,7 +162,18 @@ func (tu *TestimoniesUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tu *TestimoniesUpdate) check() error {
+	if _, ok := tu.mutation.DestiniesID(); tu.mutation.DestiniesCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Testimonies.destinies"`)
+	}
+	return nil
+}
+
 func (tu *TestimoniesUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := tu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(testimonies.Table, testimonies.Columns, sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -153,6 +196,35 @@ func (tu *TestimoniesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.UpdatedAt(); ok {
 		_spec.SetField(testimonies.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if tu.mutation.DestiniesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   testimonies.DestiniesTable,
+			Columns: []string{testimonies.DestiniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinies.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.DestiniesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   testimonies.DestiniesTable,
+			Columns: []string{testimonies.DestiniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -216,6 +288,20 @@ func (tuo *TestimoniesUpdateOne) SetNillablePicture(s *string) *TestimoniesUpdat
 	return tuo
 }
 
+// SetDestinyID sets the "destiny_id" field.
+func (tuo *TestimoniesUpdateOne) SetDestinyID(i int) *TestimoniesUpdateOne {
+	tuo.mutation.SetDestinyID(i)
+	return tuo
+}
+
+// SetNillableDestinyID sets the "destiny_id" field if the given value is not nil.
+func (tuo *TestimoniesUpdateOne) SetNillableDestinyID(i *int) *TestimoniesUpdateOne {
+	if i != nil {
+		tuo.SetDestinyID(*i)
+	}
+	return tuo
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (tuo *TestimoniesUpdateOne) SetCreatedAt(t time.Time) *TestimoniesUpdateOne {
 	tuo.mutation.SetCreatedAt(t)
@@ -244,9 +330,26 @@ func (tuo *TestimoniesUpdateOne) SetNillableUpdatedAt(t *time.Time) *Testimonies
 	return tuo
 }
 
+// SetDestiniesID sets the "destinies" edge to the Destinies entity by ID.
+func (tuo *TestimoniesUpdateOne) SetDestiniesID(id int) *TestimoniesUpdateOne {
+	tuo.mutation.SetDestiniesID(id)
+	return tuo
+}
+
+// SetDestinies sets the "destinies" edge to the Destinies entity.
+func (tuo *TestimoniesUpdateOne) SetDestinies(d *Destinies) *TestimoniesUpdateOne {
+	return tuo.SetDestiniesID(d.ID)
+}
+
 // Mutation returns the TestimoniesMutation object of the builder.
 func (tuo *TestimoniesUpdateOne) Mutation() *TestimoniesMutation {
 	return tuo.mutation
+}
+
+// ClearDestinies clears the "destinies" edge to the Destinies entity.
+func (tuo *TestimoniesUpdateOne) ClearDestinies() *TestimoniesUpdateOne {
+	tuo.mutation.ClearDestinies()
+	return tuo
 }
 
 // Where appends a list predicates to the TestimoniesUpdate builder.
@@ -289,7 +392,18 @@ func (tuo *TestimoniesUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tuo *TestimoniesUpdateOne) check() error {
+	if _, ok := tuo.mutation.DestiniesID(); tuo.mutation.DestiniesCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Testimonies.destinies"`)
+	}
+	return nil
+}
+
 func (tuo *TestimoniesUpdateOne) sqlSave(ctx context.Context) (_node *Testimonies, err error) {
+	if err := tuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(testimonies.Table, testimonies.Columns, sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt))
 	id, ok := tuo.mutation.ID()
 	if !ok {
@@ -329,6 +443,35 @@ func (tuo *TestimoniesUpdateOne) sqlSave(ctx context.Context) (_node *Testimonie
 	}
 	if value, ok := tuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(testimonies.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if tuo.mutation.DestiniesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   testimonies.DestiniesTable,
+			Columns: []string{testimonies.DestiniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinies.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.DestiniesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   testimonies.DestiniesTable,
+			Columns: []string{testimonies.DestiniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Testimonies{config: tuo.config}
 	_spec.Assign = _node.assignValues
