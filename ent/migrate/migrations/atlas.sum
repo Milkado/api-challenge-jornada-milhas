@@ -1,4 +1,4 @@
-h1:XQ/cGxega3O3caDpQn1DvXBurvugjCNsmorRAXvfesU=
+h1:HXwaV4C8rt/KIpYi2T4FLeS31h38UGYNvdA9eQzNzuw=
 20240629033552_create_testimonies_table.sql h1:5/bdk6lrBV2Igv7YyiJdq8FEpYYQtZMuY5/eWJehuXk=
 20240702000732_create_users_table.sql h1:N137BiXuA9ujoRzhfb+s9E2T3Y++hx5/KUqnbCn5fU0=
 20240702221317_alter_testimonies_add_timestamps.sql h1:M0RoZzoRqrvVb/Top6fN6JmMHvB8/ajvGnME7vUdvjc=
@@ -8,3 +8,4 @@ h1:XQ/cGxega3O3caDpQn1DvXBurvugjCNsmorRAXvfesU=
 20240804034744_create_destinies_table.sql h1:EXH6oUzJz9DUCwRsP2fiQcg2D9PZzRjbHSutWitWGPo=
 20240804235243_alter_destinies_name_string.sql h1:nPIpVFK/Ifn5hzKWIX5H7jh2vSVfqGVSra+TherB0ps=
 20240818201525_alter_destnies_add_meta_description_remove_picture.sql h1:u5gJhK1Vkze1ushaQMwMxxYolIihuLRZ2gHNjTQ3G7A=
+20240818225904_add_destiny_to_testimony.sql h1:dbClUwfjtmKnjpWEiqqHSwgg0d2Qw/VtDUWl8dw+5Mk=

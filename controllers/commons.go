@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Milkado/api-challenge-jornada-milhas/database"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
 	"github.com/labstack/echo/v4"
@@ -71,4 +72,12 @@ func idToInt(c echo.Context, idParam string) int {
 	}
 
 	return id
+}
+
+func checkIfDestinyExists(c echo.Context, id int) bool {
+	client := database.ConnectDB()
+	defer client.Close()
+
+	_, err := client.Destinies.Get(ctx, id)
+	return err == nil
 }

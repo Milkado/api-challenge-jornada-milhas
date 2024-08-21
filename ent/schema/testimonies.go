@@ -5,9 +5,10 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/Milkado/api-challenge-jornada-milhas/ent/hook"
 	gen "github.com/Milkado/api-challenge-jornada-milhas/ent"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/hook"
 )
 
 // Testmonies holds the schema definition for the Testmonies entity.
@@ -21,6 +22,7 @@ func (Testimonies) Fields() []ent.Field {
 		field.Text("testimony"),
 		field.String("name"),
 		field.String("picture").Unique(),
+		field.Int("destiny_id"),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now),
 	}
@@ -28,7 +30,13 @@ func (Testimonies) Fields() []ent.Field {
 
 // Edges of the Testmonies.
 func (Testimonies) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("destinies", Destinies.Type).
+			Ref("testimonies").
+			Field("destiny_id").
+			Unique().
+			Required(),
+	}
 }
 
 func (Testimonies) Hooks() []ent.Hook {

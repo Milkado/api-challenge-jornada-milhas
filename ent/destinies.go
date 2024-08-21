@@ -28,8 +28,29 @@ type Destinies struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the DestiniesQuery when eager-loading is set.
+	Edges        DestiniesEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// DestiniesEdges holds the relations/edges for other nodes in the graph.
+type DestiniesEdges struct {
+	// Testimonies holds the value of the testimonies edge.
+	Testimonies []*Testimonies `json:"testimonies,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// TestimoniesOrErr returns the Testimonies value or an error if the edge
+// was not loaded in eager-loading.
+func (e DestiniesEdges) TestimoniesOrErr() ([]*Testimonies, error) {
+	if e.loadedTypes[0] {
+		return e.Testimonies, nil
+	}
+	return nil, &NotLoadedError{edge: "testimonies"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -114,6 +135,11 @@ func (d *Destinies) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (d *Destinies) Value(name string) (ent.Value, error) {
 	return d.selectValues.Get(name)
+}
+
+// QueryTestimonies queries the "testimonies" edge of the Destinies entity.
+func (d *Destinies) QueryTestimonies() *TestimoniesQuery {
+	return NewDestiniesClient(d.config).QueryTestimonies(d)
 }
 
 // Update returns a builder for updating this Destinies.

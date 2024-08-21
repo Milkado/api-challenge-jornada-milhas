@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/users"
@@ -324,6 +325,22 @@ func (c *DestiniesClient) GetX(ctx context.Context, id int) *Destinies {
 	return obj
 }
 
+// QueryTestimonies queries the testimonies edge of a Destinies.
+func (c *DestiniesClient) QueryTestimonies(d *Destinies) *TestimoniesQuery {
+	query := (&TestimoniesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(destinies.Table, destinies.FieldID, id),
+			sqlgraph.To(testimonies.Table, testimonies.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, destinies.TestimoniesTable, destinies.TestimoniesColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DestiniesClient) Hooks() []Hook {
 	hooks := c.hooks.Destinies
@@ -456,6 +473,22 @@ func (c *TestimoniesClient) GetX(ctx context.Context, id int) *Testimonies {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryDestinies queries the destinies edge of a Testimonies.
+func (c *TestimoniesClient) QueryDestinies(t *Testimonies) *DestiniesQuery {
+	query := (&DestiniesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(testimonies.Table, testimonies.FieldID, id),
+			sqlgraph.To(destinies.Table, destinies.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, testimonies.DestiniesTable, testimonies.DestiniesColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

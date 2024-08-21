@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 )
 
 // DestiniesCreate is the builder for creating a Destinies entity.
@@ -78,6 +79,21 @@ func (dc *DestiniesCreate) SetNillableUpdatedAt(t *time.Time) *DestiniesCreate {
 		dc.SetUpdatedAt(*t)
 	}
 	return dc
+}
+
+// AddTestimonyIDs adds the "testimonies" edge to the Testimonies entity by IDs.
+func (dc *DestiniesCreate) AddTestimonyIDs(ids ...int) *DestiniesCreate {
+	dc.mutation.AddTestimonyIDs(ids...)
+	return dc
+}
+
+// AddTestimonies adds the "testimonies" edges to the Testimonies entity.
+func (dc *DestiniesCreate) AddTestimonies(t ...*Testimonies) *DestiniesCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return dc.AddTestimonyIDs(ids...)
 }
 
 // Mutation returns the DestiniesMutation object of the builder.
@@ -205,6 +221,22 @@ func (dc *DestiniesCreate) createSpec() (*Destinies, *sqlgraph.CreateSpec) {
 	if value, ok := dc.mutation.UpdatedAt(); ok {
 		_spec.SetField(destinies.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if nodes := dc.mutation.TestimoniesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.TestimoniesTable,
+			Columns: []string{destinies.TestimoniesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/predicate"
 )
 
@@ -407,6 +408,29 @@ func UpdatedAtLT(v time.Time) predicate.Destinies {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Destinies {
 	return predicate.Destinies(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// HasTestimonies applies the HasEdge predicate on the "testimonies" edge.
+func HasTestimonies() predicate.Destinies {
+	return predicate.Destinies(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TestimoniesTable, TestimoniesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTestimoniesWith applies the HasEdge predicate on the "testimonies" edge with a given conditions (other predicates).
+func HasTestimoniesWith(preds ...predicate.Testimonies) predicate.Destinies {
+	return predicate.Destinies(func(s *sql.Selector) {
+		step := newTestimoniesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

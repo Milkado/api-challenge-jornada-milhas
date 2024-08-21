@@ -32,12 +32,21 @@ var (
 		{Name: "picture", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "destiny_id", Type: field.TypeInt},
 	}
 	// TestimoniesTable holds the schema information for the "testimonies" table.
 	TestimoniesTable = &schema.Table{
 		Name:       "testimonies",
 		Columns:    TestimoniesColumns,
 		PrimaryKey: []*schema.Column{TestimoniesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "testimonies_destinies_testimonies",
+				Columns:    []*schema.Column{TestimoniesColumns[6]},
+				RefColumns: []*schema.Column{DestiniesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -65,4 +74,5 @@ var (
 )
 
 func init() {
+	TestimoniesTable.ForeignKeys[0].RefTable = DestiniesTable
 }
