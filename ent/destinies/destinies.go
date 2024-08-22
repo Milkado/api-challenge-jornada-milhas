@@ -29,6 +29,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// EdgeTestimonies holds the string denoting the testimonies edge name in mutations.
 	EdgeTestimonies = "testimonies"
+	// EdgeDestinyPictures holds the string denoting the destiny_pictures edge name in mutations.
+	EdgeDestinyPictures = "destiny_pictures"
 	// Table holds the table name of the destinies in the database.
 	Table = "destinies"
 	// TestimoniesTable is the table that holds the testimonies relation/edge.
@@ -38,6 +40,13 @@ const (
 	TestimoniesInverseTable = "testimonies"
 	// TestimoniesColumn is the table column denoting the testimonies relation/edge.
 	TestimoniesColumn = "destiny_id"
+	// DestinyPicturesTable is the table that holds the destiny_pictures relation/edge.
+	DestinyPicturesTable = "destiny_pictures"
+	// DestinyPicturesInverseTable is the table name for the DestinyPictures entity.
+	// It exists in this package in order to avoid circular dependency with the "destinypictures" package.
+	DestinyPicturesInverseTable = "destiny_pictures"
+	// DestinyPicturesColumn is the table column denoting the destiny_pictures relation/edge.
+	DestinyPicturesColumn = "destiny_id"
 )
 
 // Columns holds all SQL columns for destinies fields.
@@ -67,7 +76,7 @@ func ValidColumn(column string) bool {
 //
 //	import _ "github.com/Milkado/api-challenge-jornada-milhas/ent/runtime"
 var (
-	Hooks [1]ent.Hook
+	Hooks [2]ent.Hook
 	// MetaValidator is a validator for the "meta" field. It is called by the builders before save.
 	MetaValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -127,10 +136,31 @@ func ByTestimonies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTestimoniesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByDestinyPicturesCount orders the results by destiny_pictures count.
+func ByDestinyPicturesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDestinyPicturesStep(), opts...)
+	}
+}
+
+// ByDestinyPictures orders the results by destiny_pictures terms.
+func ByDestinyPictures(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDestinyPicturesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newTestimoniesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TestimoniesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TestimoniesTable, TestimoniesColumn),
+	)
+}
+func newDestinyPicturesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DestinyPicturesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DestinyPicturesTable, DestinyPicturesColumn),
 	)
 }

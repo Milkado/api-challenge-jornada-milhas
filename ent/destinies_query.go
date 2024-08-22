@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinypictures"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/predicate"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 )
@@ -19,11 +20,12 @@ import (
 // DestiniesQuery is the builder for querying Destinies entities.
 type DestiniesQuery struct {
 	config
-	ctx             *QueryContext
-	order           []destinies.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Destinies
-	withTestimonies *TestimoniesQuery
+	ctx                 *QueryContext
+	order               []destinies.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.Destinies
+	withTestimonies     *TestimoniesQuery
+	withDestinyPictures *DestinyPicturesQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +77,28 @@ func (dq *DestiniesQuery) QueryTestimonies() *TestimoniesQuery {
 			sqlgraph.From(destinies.Table, destinies.FieldID, selector),
 			sqlgraph.To(testimonies.Table, testimonies.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, destinies.TestimoniesTable, destinies.TestimoniesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDestinyPictures chains the current query on the "destiny_pictures" edge.
+func (dq *DestiniesQuery) QueryDestinyPictures() *DestinyPicturesQuery {
+	query := (&DestinyPicturesClient{config: dq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(destinies.Table, destinies.FieldID, selector),
+			sqlgraph.To(destinypictures.Table, destinypictures.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, destinies.DestinyPicturesTable, destinies.DestinyPicturesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +293,13 @@ func (dq *DestiniesQuery) Clone() *DestiniesQuery {
 		return nil
 	}
 	return &DestiniesQuery{
-		config:          dq.config,
-		ctx:             dq.ctx.Clone(),
-		order:           append([]destinies.OrderOption{}, dq.order...),
-		inters:          append([]Interceptor{}, dq.inters...),
-		predicates:      append([]predicate.Destinies{}, dq.predicates...),
-		withTestimonies: dq.withTestimonies.Clone(),
+		config:              dq.config,
+		ctx:                 dq.ctx.Clone(),
+		order:               append([]destinies.OrderOption{}, dq.order...),
+		inters:              append([]Interceptor{}, dq.inters...),
+		predicates:          append([]predicate.Destinies{}, dq.predicates...),
+		withTestimonies:     dq.withTestimonies.Clone(),
+		withDestinyPictures: dq.withDestinyPictures.Clone(),
 		// clone intermediate query.
 		sql:  dq.sql.Clone(),
 		path: dq.path,
@@ -289,6 +314,17 @@ func (dq *DestiniesQuery) WithTestimonies(opts ...func(*TestimoniesQuery)) *Dest
 		opt(query)
 	}
 	dq.withTestimonies = query
+	return dq
+}
+
+// WithDestinyPictures tells the query-builder to eager-load the nodes that are connected to
+// the "destiny_pictures" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DestiniesQuery) WithDestinyPictures(opts ...func(*DestinyPicturesQuery)) *DestiniesQuery {
+	query := (&DestinyPicturesClient{config: dq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	dq.withDestinyPictures = query
 	return dq
 }
 
@@ -370,8 +406,9 @@ func (dq *DestiniesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*De
 	var (
 		nodes       = []*Destinies{}
 		_spec       = dq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			dq.withTestimonies != nil,
+			dq.withDestinyPictures != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -399,6 +436,13 @@ func (dq *DestiniesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*De
 			return nil, err
 		}
 	}
+	if query := dq.withDestinyPictures; query != nil {
+		if err := dq.loadDestinyPictures(ctx, query, nodes,
+			func(n *Destinies) { n.Edges.DestinyPictures = []*DestinyPictures{} },
+			func(n *Destinies, e *DestinyPictures) { n.Edges.DestinyPictures = append(n.Edges.DestinyPictures, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -417,6 +461,36 @@ func (dq *DestiniesQuery) loadTestimonies(ctx context.Context, query *Testimonie
 	}
 	query.Where(predicate.Testimonies(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(destinies.TestimoniesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.DestinyID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "destiny_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (dq *DestiniesQuery) loadDestinyPictures(ctx context.Context, query *DestinyPicturesQuery, nodes []*Destinies, init func(*Destinies), assign func(*Destinies, *DestinyPictures)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Destinies)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(destinypictures.FieldDestinyID)
+	}
+	query.Where(predicate.DestinyPictures(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(destinies.DestinyPicturesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

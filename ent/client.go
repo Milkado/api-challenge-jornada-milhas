@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinypictures"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/users"
 )
@@ -27,6 +28,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Destinies is the client for interacting with the Destinies builders.
 	Destinies *DestiniesClient
+	// DestinyPictures is the client for interacting with the DestinyPictures builders.
+	DestinyPictures *DestinyPicturesClient
 	// Testimonies is the client for interacting with the Testimonies builders.
 	Testimonies *TestimoniesClient
 	// Users is the client for interacting with the Users builders.
@@ -43,6 +46,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Destinies = NewDestiniesClient(c.config)
+	c.DestinyPictures = NewDestinyPicturesClient(c.config)
 	c.Testimonies = NewTestimoniesClient(c.config)
 	c.Users = NewUsersClient(c.config)
 }
@@ -135,11 +139,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Destinies:   NewDestiniesClient(cfg),
-		Testimonies: NewTestimoniesClient(cfg),
-		Users:       NewUsersClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		Destinies:       NewDestiniesClient(cfg),
+		DestinyPictures: NewDestinyPicturesClient(cfg),
+		Testimonies:     NewTestimoniesClient(cfg),
+		Users:           NewUsersClient(cfg),
 	}, nil
 }
 
@@ -157,11 +162,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Destinies:   NewDestiniesClient(cfg),
-		Testimonies: NewTestimoniesClient(cfg),
-		Users:       NewUsersClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		Destinies:       NewDestiniesClient(cfg),
+		DestinyPictures: NewDestinyPicturesClient(cfg),
+		Testimonies:     NewTestimoniesClient(cfg),
+		Users:           NewUsersClient(cfg),
 	}, nil
 }
 
@@ -191,6 +197,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Destinies.Use(hooks...)
+	c.DestinyPictures.Use(hooks...)
 	c.Testimonies.Use(hooks...)
 	c.Users.Use(hooks...)
 }
@@ -199,6 +206,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Destinies.Intercept(interceptors...)
+	c.DestinyPictures.Intercept(interceptors...)
 	c.Testimonies.Intercept(interceptors...)
 	c.Users.Intercept(interceptors...)
 }
@@ -208,6 +216,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *DestiniesMutation:
 		return c.Destinies.mutate(ctx, m)
+	case *DestinyPicturesMutation:
+		return c.DestinyPictures.mutate(ctx, m)
 	case *TestimoniesMutation:
 		return c.Testimonies.mutate(ctx, m)
 	case *UsersMutation:
@@ -341,6 +351,22 @@ func (c *DestiniesClient) QueryTestimonies(d *Destinies) *TestimoniesQuery {
 	return query
 }
 
+// QueryDestinyPictures queries the destiny_pictures edge of a Destinies.
+func (c *DestiniesClient) QueryDestinyPictures(d *Destinies) *DestinyPicturesQuery {
+	query := (&DestinyPicturesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(destinies.Table, destinies.FieldID, id),
+			sqlgraph.To(destinypictures.Table, destinypictures.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, destinies.DestinyPicturesTable, destinies.DestinyPicturesColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DestiniesClient) Hooks() []Hook {
 	hooks := c.hooks.Destinies
@@ -364,6 +390,155 @@ func (c *DestiniesClient) mutate(ctx context.Context, m *DestiniesMutation) (Val
 		return (&DestiniesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Destinies mutation op: %q", m.Op())
+	}
+}
+
+// DestinyPicturesClient is a client for the DestinyPictures schema.
+type DestinyPicturesClient struct {
+	config
+}
+
+// NewDestinyPicturesClient returns a client for the DestinyPictures from the given config.
+func NewDestinyPicturesClient(c config) *DestinyPicturesClient {
+	return &DestinyPicturesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `destinypictures.Hooks(f(g(h())))`.
+func (c *DestinyPicturesClient) Use(hooks ...Hook) {
+	c.hooks.DestinyPictures = append(c.hooks.DestinyPictures, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `destinypictures.Intercept(f(g(h())))`.
+func (c *DestinyPicturesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DestinyPictures = append(c.inters.DestinyPictures, interceptors...)
+}
+
+// Create returns a builder for creating a DestinyPictures entity.
+func (c *DestinyPicturesClient) Create() *DestinyPicturesCreate {
+	mutation := newDestinyPicturesMutation(c.config, OpCreate)
+	return &DestinyPicturesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DestinyPictures entities.
+func (c *DestinyPicturesClient) CreateBulk(builders ...*DestinyPicturesCreate) *DestinyPicturesCreateBulk {
+	return &DestinyPicturesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DestinyPicturesClient) MapCreateBulk(slice any, setFunc func(*DestinyPicturesCreate, int)) *DestinyPicturesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DestinyPicturesCreateBulk{err: fmt.Errorf("calling to DestinyPicturesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DestinyPicturesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DestinyPicturesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DestinyPictures.
+func (c *DestinyPicturesClient) Update() *DestinyPicturesUpdate {
+	mutation := newDestinyPicturesMutation(c.config, OpUpdate)
+	return &DestinyPicturesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DestinyPicturesClient) UpdateOne(dp *DestinyPictures) *DestinyPicturesUpdateOne {
+	mutation := newDestinyPicturesMutation(c.config, OpUpdateOne, withDestinyPictures(dp))
+	return &DestinyPicturesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DestinyPicturesClient) UpdateOneID(id int) *DestinyPicturesUpdateOne {
+	mutation := newDestinyPicturesMutation(c.config, OpUpdateOne, withDestinyPicturesID(id))
+	return &DestinyPicturesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DestinyPictures.
+func (c *DestinyPicturesClient) Delete() *DestinyPicturesDelete {
+	mutation := newDestinyPicturesMutation(c.config, OpDelete)
+	return &DestinyPicturesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DestinyPicturesClient) DeleteOne(dp *DestinyPictures) *DestinyPicturesDeleteOne {
+	return c.DeleteOneID(dp.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DestinyPicturesClient) DeleteOneID(id int) *DestinyPicturesDeleteOne {
+	builder := c.Delete().Where(destinypictures.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DestinyPicturesDeleteOne{builder}
+}
+
+// Query returns a query builder for DestinyPictures.
+func (c *DestinyPicturesClient) Query() *DestinyPicturesQuery {
+	return &DestinyPicturesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDestinyPictures},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DestinyPictures entity by its id.
+func (c *DestinyPicturesClient) Get(ctx context.Context, id int) (*DestinyPictures, error) {
+	return c.Query().Where(destinypictures.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DestinyPicturesClient) GetX(ctx context.Context, id int) *DestinyPictures {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDestinies queries the destinies edge of a DestinyPictures.
+func (c *DestinyPicturesClient) QueryDestinies(dp *DestinyPictures) *DestiniesQuery {
+	query := (&DestiniesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(destinypictures.Table, destinypictures.FieldID, id),
+			sqlgraph.To(destinies.Table, destinies.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, destinypictures.DestiniesTable, destinypictures.DestiniesColumn),
+		)
+		fromV = sqlgraph.Neighbors(dp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DestinyPicturesClient) Hooks() []Hook {
+	return c.hooks.DestinyPictures
+}
+
+// Interceptors returns the client interceptors.
+func (c *DestinyPicturesClient) Interceptors() []Interceptor {
+	return c.inters.DestinyPictures
+}
+
+func (c *DestinyPicturesClient) mutate(ctx context.Context, m *DestinyPicturesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DestinyPicturesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DestinyPicturesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DestinyPicturesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DestinyPicturesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DestinyPictures mutation op: %q", m.Op())
 	}
 }
 
@@ -653,9 +828,9 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Destinies, Testimonies, Users []ent.Hook
+		Destinies, DestinyPictures, Testimonies, Users []ent.Hook
 	}
 	inters struct {
-		Destinies, Testimonies, Users []ent.Interceptor
+		Destinies, DestinyPictures, Testimonies, Users []ent.Interceptor
 	}
 )

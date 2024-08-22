@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/Milkado/api-challenge-jornada-milhas/database"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent"
@@ -19,6 +20,16 @@ type (
 		Meta        string  `json:"meta" xml:"meta" form:"meta" validate:"required,min=1,max=160"`
 		Description *string `json:"description,omitempty" xml:"description,omitempty" form:"description,omitempty"`
 	}
+	Pictures struct {
+		File []string `json:"file" xml:"file" form:"file" validate:"required"`
+	}
+	Picture struct {
+		Picture string `json:"picture" xml:"picture" form:"picture" validate:"required"`
+	}
+)
+
+var (
+	path = "./public/destinies/"
 )
 
 func IndexDestinies(c echo.Context) error {
@@ -144,6 +155,106 @@ func DeleteDestiny(c echo.Context) error {
 		}
 
 		return c.JSON(http.StatusOK, "Deleted")
+	}); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	return nil
+}
+
+func StoreDestinyPicture(c echo.Context) error {
+	client := database.ConnectDB()
+	defer client.Close()
+
+	if err := withTx(ctx, client, func(tx *ent.Tx) error {
+		p := new(Picture)
+		if bindErr := c.Bind(p); bindErr != nil {
+			return c.JSON(http.StatusBadRequest, bindErr)
+		}
+		if validateErr := helpers.Validate(p, c); validateErr != nil {
+			return c.JSON(http.StatusBadRequest, validateErr)
+		}
+
+		destinyID := idToInt(c, c.Param("id"))
+		var fileName string
+		var err error
+		if strings.HasPrefix(p.Picture, "data:image") {
+			base64File := p.Picture
+			fileName, err = storeBase64Picture(base64File, c, path)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+		} else {
+			file, fErr := c.FormFile(p.Picture)
+			if fErr != nil {
+				return c.JSON(http.StatusBadRequest, fErr)
+			}
+			fileName, err = storeFormPicture(file, c, path)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+		}
+
+		newPicture, err := client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(path).Save(ctx)
+
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		return c.JSON(http.StatusCreated, newPicture)
+	}); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	return nil
+}
+
+func StoreManyDestinyPictures(c echo.Context) error {
+	client := database.ConnectDB()
+	defer client.Close()
+
+	if err := withTx(ctx, client, func(tx *ent.Tx) error {
+		p := new(Pictures)
+		if bindErr := c.Bind(p); bindErr != nil {
+			return c.JSON(http.StatusBadRequest, bindErr)
+		}
+		if validateErr := helpers.Validate(p, c); validateErr != nil {
+			return c.JSON(http.StatusBadRequest, validateErr)
+		}
+
+		destinyID := idToInt(c, c.Param("id"))
+		for _, picture := range p.File {
+			if strings.HasPrefix(picture, "data:image") {
+				base64File := picture
+				fileName, err := storeBase64Picture(base64File, c, path)
+				if err != nil {
+					return c.JSON(http.StatusBadRequest, err)
+				}
+				_, err = client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(path).Save(ctx)
+
+				if err != nil {
+					return c.JSON(http.StatusBadRequest, err)
+				}
+
+			} else {
+				file, err := c.FormFile(picture)
+				if err != nil {
+					return c.JSON(http.StatusBadRequest, err)
+				}
+				fileName, err := storeFormPicture(file, c, path)
+				if err != nil {
+					return c.JSON(http.StatusBadRequest, err)
+				}
+
+				_, err = client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(path).Save(ctx)
+
+				if err != nil {
+					return c.JSON(http.StatusBadRequest, err)
+				}
+			}
+		}
+
+		return c.JSON(http.StatusCreated, "Pictures created")
 	}); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}

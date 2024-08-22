@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinypictures"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/predicate"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/users"
@@ -26,31 +27,35 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeDestinies   = "Destinies"
-	TypeTestimonies = "Testimonies"
-	TypeUsers       = "Users"
+	TypeDestinies       = "Destinies"
+	TypeDestinyPictures = "DestinyPictures"
+	TypeTestimonies     = "Testimonies"
+	TypeUsers           = "Users"
 )
 
 // DestiniesMutation represents an operation that mutates the Destinies nodes in the graph.
 type DestiniesMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	name               *string
-	price              *float64
-	addprice           *float64
-	meta               *string
-	description        *string
-	created_at         *time.Time
-	updated_at         *time.Time
-	clearedFields      map[string]struct{}
-	testimonies        map[int]struct{}
-	removedtestimonies map[int]struct{}
-	clearedtestimonies bool
-	done               bool
-	oldValue           func(context.Context) (*Destinies, error)
-	predicates         []predicate.Destinies
+	op                      Op
+	typ                     string
+	id                      *int
+	name                    *string
+	price                   *float64
+	addprice                *float64
+	meta                    *string
+	description             *string
+	created_at              *time.Time
+	updated_at              *time.Time
+	clearedFields           map[string]struct{}
+	testimonies             map[int]struct{}
+	removedtestimonies      map[int]struct{}
+	clearedtestimonies      bool
+	destiny_pictures        map[int]struct{}
+	removeddestiny_pictures map[int]struct{}
+	cleareddestiny_pictures bool
+	done                    bool
+	oldValue                func(context.Context) (*Destinies, error)
+	predicates              []predicate.Destinies
 }
 
 var _ ent.Mutation = (*DestiniesMutation)(nil)
@@ -454,6 +459,60 @@ func (m *DestiniesMutation) ResetTestimonies() {
 	m.removedtestimonies = nil
 }
 
+// AddDestinyPictureIDs adds the "destiny_pictures" edge to the DestinyPictures entity by ids.
+func (m *DestiniesMutation) AddDestinyPictureIDs(ids ...int) {
+	if m.destiny_pictures == nil {
+		m.destiny_pictures = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.destiny_pictures[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDestinyPictures clears the "destiny_pictures" edge to the DestinyPictures entity.
+func (m *DestiniesMutation) ClearDestinyPictures() {
+	m.cleareddestiny_pictures = true
+}
+
+// DestinyPicturesCleared reports if the "destiny_pictures" edge to the DestinyPictures entity was cleared.
+func (m *DestiniesMutation) DestinyPicturesCleared() bool {
+	return m.cleareddestiny_pictures
+}
+
+// RemoveDestinyPictureIDs removes the "destiny_pictures" edge to the DestinyPictures entity by IDs.
+func (m *DestiniesMutation) RemoveDestinyPictureIDs(ids ...int) {
+	if m.removeddestiny_pictures == nil {
+		m.removeddestiny_pictures = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.destiny_pictures, ids[i])
+		m.removeddestiny_pictures[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDestinyPictures returns the removed IDs of the "destiny_pictures" edge to the DestinyPictures entity.
+func (m *DestiniesMutation) RemovedDestinyPicturesIDs() (ids []int) {
+	for id := range m.removeddestiny_pictures {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DestinyPicturesIDs returns the "destiny_pictures" edge IDs in the mutation.
+func (m *DestiniesMutation) DestinyPicturesIDs() (ids []int) {
+	for id := range m.destiny_pictures {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDestinyPictures resets all changes to the "destiny_pictures" edge.
+func (m *DestiniesMutation) ResetDestinyPictures() {
+	m.destiny_pictures = nil
+	m.cleareddestiny_pictures = false
+	m.removeddestiny_pictures = nil
+}
+
 // Where appends a list predicates to the DestiniesMutation builder.
 func (m *DestiniesMutation) Where(ps ...predicate.Destinies) {
 	m.predicates = append(m.predicates, ps...)
@@ -696,9 +755,12 @@ func (m *DestiniesMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DestiniesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.testimonies != nil {
 		edges = append(edges, destinies.EdgeTestimonies)
+	}
+	if m.destiny_pictures != nil {
+		edges = append(edges, destinies.EdgeDestinyPictures)
 	}
 	return edges
 }
@@ -713,15 +775,24 @@ func (m *DestiniesMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case destinies.EdgeDestinyPictures:
+		ids := make([]ent.Value, 0, len(m.destiny_pictures))
+		for id := range m.destiny_pictures {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DestiniesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedtestimonies != nil {
 		edges = append(edges, destinies.EdgeTestimonies)
+	}
+	if m.removeddestiny_pictures != nil {
+		edges = append(edges, destinies.EdgeDestinyPictures)
 	}
 	return edges
 }
@@ -736,15 +807,24 @@ func (m *DestiniesMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case destinies.EdgeDestinyPictures:
+		ids := make([]ent.Value, 0, len(m.removeddestiny_pictures))
+		for id := range m.removeddestiny_pictures {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DestiniesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedtestimonies {
 		edges = append(edges, destinies.EdgeTestimonies)
+	}
+	if m.cleareddestiny_pictures {
+		edges = append(edges, destinies.EdgeDestinyPictures)
 	}
 	return edges
 }
@@ -755,6 +835,8 @@ func (m *DestiniesMutation) EdgeCleared(name string) bool {
 	switch name {
 	case destinies.EdgeTestimonies:
 		return m.clearedtestimonies
+	case destinies.EdgeDestinyPictures:
+		return m.cleareddestiny_pictures
 	}
 	return false
 }
@@ -774,8 +856,623 @@ func (m *DestiniesMutation) ResetEdge(name string) error {
 	case destinies.EdgeTestimonies:
 		m.ResetTestimonies()
 		return nil
+	case destinies.EdgeDestinyPictures:
+		m.ResetDestinyPictures()
+		return nil
 	}
 	return fmt.Errorf("unknown Destinies edge %s", name)
+}
+
+// DestinyPicturesMutation represents an operation that mutates the DestinyPictures nodes in the graph.
+type DestinyPicturesMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	picture          *string
+	_path            *string
+	created_at       *time.Time
+	updated_at       *time.Time
+	clearedFields    map[string]struct{}
+	destinies        *int
+	cleareddestinies bool
+	done             bool
+	oldValue         func(context.Context) (*DestinyPictures, error)
+	predicates       []predicate.DestinyPictures
+}
+
+var _ ent.Mutation = (*DestinyPicturesMutation)(nil)
+
+// destinypicturesOption allows management of the mutation configuration using functional options.
+type destinypicturesOption func(*DestinyPicturesMutation)
+
+// newDestinyPicturesMutation creates new mutation for the DestinyPictures entity.
+func newDestinyPicturesMutation(c config, op Op, opts ...destinypicturesOption) *DestinyPicturesMutation {
+	m := &DestinyPicturesMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDestinyPictures,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDestinyPicturesID sets the ID field of the mutation.
+func withDestinyPicturesID(id int) destinypicturesOption {
+	return func(m *DestinyPicturesMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DestinyPictures
+		)
+		m.oldValue = func(ctx context.Context) (*DestinyPictures, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DestinyPictures.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDestinyPictures sets the old DestinyPictures of the mutation.
+func withDestinyPictures(node *DestinyPictures) destinypicturesOption {
+	return func(m *DestinyPicturesMutation) {
+		m.oldValue = func(context.Context) (*DestinyPictures, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DestinyPicturesMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DestinyPicturesMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DestinyPicturesMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DestinyPicturesMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DestinyPictures.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPicture sets the "picture" field.
+func (m *DestinyPicturesMutation) SetPicture(s string) {
+	m.picture = &s
+}
+
+// Picture returns the value of the "picture" field in the mutation.
+func (m *DestinyPicturesMutation) Picture() (r string, exists bool) {
+	v := m.picture
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPicture returns the old "picture" field's value of the DestinyPictures entity.
+// If the DestinyPictures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DestinyPicturesMutation) OldPicture(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPicture is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPicture requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPicture: %w", err)
+	}
+	return oldValue.Picture, nil
+}
+
+// ResetPicture resets all changes to the "picture" field.
+func (m *DestinyPicturesMutation) ResetPicture() {
+	m.picture = nil
+}
+
+// SetPath sets the "path" field.
+func (m *DestinyPicturesMutation) SetPath(s string) {
+	m._path = &s
+}
+
+// Path returns the value of the "path" field in the mutation.
+func (m *DestinyPicturesMutation) Path() (r string, exists bool) {
+	v := m._path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPath returns the old "path" field's value of the DestinyPictures entity.
+// If the DestinyPictures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DestinyPicturesMutation) OldPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
+	}
+	return oldValue.Path, nil
+}
+
+// ResetPath resets all changes to the "path" field.
+func (m *DestinyPicturesMutation) ResetPath() {
+	m._path = nil
+}
+
+// SetDestinyID sets the "destiny_id" field.
+func (m *DestinyPicturesMutation) SetDestinyID(i int) {
+	m.destinies = &i
+}
+
+// DestinyID returns the value of the "destiny_id" field in the mutation.
+func (m *DestinyPicturesMutation) DestinyID() (r int, exists bool) {
+	v := m.destinies
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDestinyID returns the old "destiny_id" field's value of the DestinyPictures entity.
+// If the DestinyPictures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DestinyPicturesMutation) OldDestinyID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDestinyID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDestinyID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDestinyID: %w", err)
+	}
+	return oldValue.DestinyID, nil
+}
+
+// ResetDestinyID resets all changes to the "destiny_id" field.
+func (m *DestinyPicturesMutation) ResetDestinyID() {
+	m.destinies = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *DestinyPicturesMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *DestinyPicturesMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the DestinyPictures entity.
+// If the DestinyPictures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DestinyPicturesMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *DestinyPicturesMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *DestinyPicturesMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *DestinyPicturesMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the DestinyPictures entity.
+// If the DestinyPictures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DestinyPicturesMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *DestinyPicturesMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDestiniesID sets the "destinies" edge to the Destinies entity by id.
+func (m *DestinyPicturesMutation) SetDestiniesID(id int) {
+	m.destinies = &id
+}
+
+// ClearDestinies clears the "destinies" edge to the Destinies entity.
+func (m *DestinyPicturesMutation) ClearDestinies() {
+	m.cleareddestinies = true
+	m.clearedFields[destinypictures.FieldDestinyID] = struct{}{}
+}
+
+// DestiniesCleared reports if the "destinies" edge to the Destinies entity was cleared.
+func (m *DestinyPicturesMutation) DestiniesCleared() bool {
+	return m.cleareddestinies
+}
+
+// DestiniesID returns the "destinies" edge ID in the mutation.
+func (m *DestinyPicturesMutation) DestiniesID() (id int, exists bool) {
+	if m.destinies != nil {
+		return *m.destinies, true
+	}
+	return
+}
+
+// DestiniesIDs returns the "destinies" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DestiniesID instead. It exists only for internal usage by the builders.
+func (m *DestinyPicturesMutation) DestiniesIDs() (ids []int) {
+	if id := m.destinies; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDestinies resets all changes to the "destinies" edge.
+func (m *DestinyPicturesMutation) ResetDestinies() {
+	m.destinies = nil
+	m.cleareddestinies = false
+}
+
+// Where appends a list predicates to the DestinyPicturesMutation builder.
+func (m *DestinyPicturesMutation) Where(ps ...predicate.DestinyPictures) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DestinyPicturesMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DestinyPicturesMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DestinyPictures, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DestinyPicturesMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DestinyPicturesMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DestinyPictures).
+func (m *DestinyPicturesMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DestinyPicturesMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.picture != nil {
+		fields = append(fields, destinypictures.FieldPicture)
+	}
+	if m._path != nil {
+		fields = append(fields, destinypictures.FieldPath)
+	}
+	if m.destinies != nil {
+		fields = append(fields, destinypictures.FieldDestinyID)
+	}
+	if m.created_at != nil {
+		fields = append(fields, destinypictures.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, destinypictures.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DestinyPicturesMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case destinypictures.FieldPicture:
+		return m.Picture()
+	case destinypictures.FieldPath:
+		return m.Path()
+	case destinypictures.FieldDestinyID:
+		return m.DestinyID()
+	case destinypictures.FieldCreatedAt:
+		return m.CreatedAt()
+	case destinypictures.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DestinyPicturesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case destinypictures.FieldPicture:
+		return m.OldPicture(ctx)
+	case destinypictures.FieldPath:
+		return m.OldPath(ctx)
+	case destinypictures.FieldDestinyID:
+		return m.OldDestinyID(ctx)
+	case destinypictures.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case destinypictures.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown DestinyPictures field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DestinyPicturesMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case destinypictures.FieldPicture:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPicture(v)
+		return nil
+	case destinypictures.FieldPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPath(v)
+		return nil
+	case destinypictures.FieldDestinyID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDestinyID(v)
+		return nil
+	case destinypictures.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case destinypictures.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DestinyPictures field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DestinyPicturesMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DestinyPicturesMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DestinyPicturesMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DestinyPictures numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DestinyPicturesMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DestinyPicturesMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DestinyPicturesMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DestinyPictures nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DestinyPicturesMutation) ResetField(name string) error {
+	switch name {
+	case destinypictures.FieldPicture:
+		m.ResetPicture()
+		return nil
+	case destinypictures.FieldPath:
+		m.ResetPath()
+		return nil
+	case destinypictures.FieldDestinyID:
+		m.ResetDestinyID()
+		return nil
+	case destinypictures.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case destinypictures.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown DestinyPictures field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DestinyPicturesMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.destinies != nil {
+		edges = append(edges, destinypictures.EdgeDestinies)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DestinyPicturesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case destinypictures.EdgeDestinies:
+		if id := m.destinies; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DestinyPicturesMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DestinyPicturesMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DestinyPicturesMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareddestinies {
+		edges = append(edges, destinypictures.EdgeDestinies)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DestinyPicturesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case destinypictures.EdgeDestinies:
+		return m.cleareddestinies
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DestinyPicturesMutation) ClearEdge(name string) error {
+	switch name {
+	case destinypictures.EdgeDestinies:
+		m.ClearDestinies()
+		return nil
+	}
+	return fmt.Errorf("unknown DestinyPictures unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DestinyPicturesMutation) ResetEdge(name string) error {
+	switch name {
+	case destinypictures.EdgeDestinies:
+		m.ResetDestinies()
+		return nil
+	}
+	return fmt.Errorf("unknown DestinyPictures edge %s", name)
 }
 
 // TestimoniesMutation represents an operation that mutates the Testimonies nodes in the graph.

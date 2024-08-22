@@ -433,6 +433,29 @@ func HasTestimoniesWith(preds ...predicate.Testimonies) predicate.Destinies {
 	})
 }
 
+// HasDestinyPictures applies the HasEdge predicate on the "destiny_pictures" edge.
+func HasDestinyPictures() predicate.Destinies {
+	return predicate.Destinies(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DestinyPicturesTable, DestinyPicturesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDestinyPicturesWith applies the HasEdge predicate on the "destiny_pictures" edge with a given conditions (other predicates).
+func HasDestinyPicturesWith(preds ...predicate.DestinyPictures) predicate.Destinies {
+	return predicate.Destinies(func(s *sql.Selector) {
+		step := newDestinyPicturesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Destinies) predicate.Destinies {
 	return predicate.Destinies(sql.AndPredicates(predicates...))

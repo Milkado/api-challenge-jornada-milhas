@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Destinies is the client for interacting with the Destinies builders.
 	Destinies *DestiniesClient
+	// DestinyPictures is the client for interacting with the DestinyPictures builders.
+	DestinyPictures *DestinyPicturesClient
 	// Testimonies is the client for interacting with the Testimonies builders.
 	Testimonies *TestimoniesClient
 	// Users is the client for interacting with the Users builders.
@@ -150,6 +152,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Destinies = NewDestiniesClient(tx.config)
+	tx.DestinyPictures = NewDestinyPicturesClient(tx.config)
 	tx.Testimonies = NewTestimoniesClient(tx.config)
 	tx.Users = NewUsersClient(tx.config)
 }

@@ -1,0 +1,2 @@
+-- Create "destiny_pictures" table
+CREATE TABLE `destiny_pictures` (`id` bigint NOT NULL AUTO_INCREMENT, `picture` varchar(255) NOT NULL, `path` varchar(255) NOT NULL, `created_at` timestamp NOT NULL, `updated_at` timestamp NOT NULL, `destiny_id` bigint NOT NULL, PRIMARY KEY (`id`), INDEX `destiny_pictures_destinies_destiny_pictures` (`destiny_id`), CONSTRAINT `destiny_pictures_destinies_destiny_pictures` FOREIGN KEY (`destiny_id`) REFERENCES `destinies` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION) CHARSET utf8mb4 COLLATE utf8mb4_bin;

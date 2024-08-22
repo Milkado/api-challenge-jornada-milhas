@@ -2,13 +2,21 @@ package controllers
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/Milkado/api-challenge-jornada-milhas/database"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent"
 	"github.com/Milkado/api-challenge-jornada-milhas/helpers"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -80,4 +88,51 @@ func checkIfDestinyExists(c echo.Context, id int) bool {
 
 	_, err := client.Destinies.Get(ctx, id)
 	return err == nil
+}
+
+func storeFormPicture(file *multipart.FileHeader, c echo.Context, path string) (string, error) {
+	src, err := file.Open()
+	if err != nil {
+		return err.Error(), err
+	}
+	defer src.Close()
+	fileExt := filepath.Ext(file.Filename)
+	fileName := uuid.New().String() + time.Now().Format("2006-01-02") + "." + fileExt
+	fullPath := filepath.Join(path, fileName)
+
+	dst, err := os.Create(fullPath)
+	if err != nil {
+		return err.Error(), err
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, src); err != nil {
+		return err.Error(), err
+	}
+
+	return fileName,nil
+}
+
+func storeBase64Picture(base64File string, c echo.Context, path string) (string, error) {
+	dataIndex := strings.Index(base64File, ",")
+	if dataIndex == -1 {
+		return "", fmt.Errorf("invalid base64 data")
+	}
+	base64Data := base64File[dataIndex+1:]
+	mimeType := strings.TrimPrefix(base64File[:dataIndex], "data:image/")
+	mimeType = strings.TrimSuffix(mimeType, ";base64")
+
+	fileName := uuid.New().String() + time.Now().Format("2006-01-02") + "." + mimeType
+	fullPath := filepath.Join(path, fileName)
+
+	data, decodeErr := base64.StdEncoding.DecodeString(base64Data)
+	if decodeErr != nil {
+		return decodeErr.Error(), decodeErr
+	}
+
+	if err := os.WriteFile(fullPath, data, 0644); err != nil {
+		return err.Error(), err
+	}
+
+	return fileName, nil
 }

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinypictures"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 )
 
@@ -94,6 +95,21 @@ func (dc *DestiniesCreate) AddTestimonies(t ...*Testimonies) *DestiniesCreate {
 		ids[i] = t[i].ID
 	}
 	return dc.AddTestimonyIDs(ids...)
+}
+
+// AddDestinyPictureIDs adds the "destiny_pictures" edge to the DestinyPictures entity by IDs.
+func (dc *DestiniesCreate) AddDestinyPictureIDs(ids ...int) *DestiniesCreate {
+	dc.mutation.AddDestinyPictureIDs(ids...)
+	return dc
+}
+
+// AddDestinyPictures adds the "destiny_pictures" edges to the DestinyPictures entity.
+func (dc *DestiniesCreate) AddDestinyPictures(d ...*DestinyPictures) *DestiniesCreate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return dc.AddDestinyPictureIDs(ids...)
 }
 
 // Mutation returns the DestiniesMutation object of the builder.
@@ -231,6 +247,22 @@ func (dc *DestiniesCreate) createSpec() (*Destinies, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dc.mutation.DestinyPicturesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.DestinyPicturesTable,
+			Columns: []string{destinies.DestinyPicturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinypictures.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -39,9 +39,11 @@ type Destinies struct {
 type DestiniesEdges struct {
 	// Testimonies holds the value of the testimonies edge.
 	Testimonies []*Testimonies `json:"testimonies,omitempty"`
+	// DestinyPictures holds the value of the destiny_pictures edge.
+	DestinyPictures []*DestinyPictures `json:"destiny_pictures,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // TestimoniesOrErr returns the Testimonies value or an error if the edge
@@ -51,6 +53,15 @@ func (e DestiniesEdges) TestimoniesOrErr() ([]*Testimonies, error) {
 		return e.Testimonies, nil
 	}
 	return nil, &NotLoadedError{edge: "testimonies"}
+}
+
+// DestinyPicturesOrErr returns the DestinyPictures value or an error if the edge
+// was not loaded in eager-loading.
+func (e DestiniesEdges) DestinyPicturesOrErr() ([]*DestinyPictures, error) {
+	if e.loadedTypes[1] {
+		return e.DestinyPictures, nil
+	}
+	return nil, &NotLoadedError{edge: "destiny_pictures"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -140,6 +151,11 @@ func (d *Destinies) Value(name string) (ent.Value, error) {
 // QueryTestimonies queries the "testimonies" edge of the Destinies entity.
 func (d *Destinies) QueryTestimonies() *TestimoniesQuery {
 	return NewDestiniesClient(d.config).QueryTestimonies(d)
+}
+
+// QueryDestinyPictures queries the "destiny_pictures" edge of the Destinies entity.
+func (d *Destinies) QueryDestinyPictures() *DestinyPicturesQuery {
+	return NewDestiniesClient(d.config).QueryDestinyPictures(d)
 }
 
 // Update returns a builder for updating this Destinies.

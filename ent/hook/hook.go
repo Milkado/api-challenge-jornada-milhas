@@ -21,6 +21,18 @@ func (f DestiniesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DestiniesMutation", m)
 }
 
+// The DestinyPicturesFunc type is an adapter to allow the use of ordinary
+// function as DestinyPictures mutator.
+type DestinyPicturesFunc func(context.Context, *ent.DestinyPicturesMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DestinyPicturesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DestinyPicturesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DestinyPicturesMutation", m)
+}
+
 // The TestimoniesFunc type is an adapter to allow the use of ordinary
 // function as Testimonies mutator.
 type TestimoniesFunc func(context.Context, *ent.TestimoniesMutation) (ent.Value, error)
