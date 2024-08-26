@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinypictures"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/predicate"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 )
@@ -141,6 +142,21 @@ func (du *DestiniesUpdate) AddTestimonies(t ...*Testimonies) *DestiniesUpdate {
 	return du.AddTestimonyIDs(ids...)
 }
 
+// AddDestinyPictureIDs adds the "destiny_pictures" edge to the DestinyPictures entity by IDs.
+func (du *DestiniesUpdate) AddDestinyPictureIDs(ids ...int) *DestiniesUpdate {
+	du.mutation.AddDestinyPictureIDs(ids...)
+	return du
+}
+
+// AddDestinyPictures adds the "destiny_pictures" edges to the DestinyPictures entity.
+func (du *DestiniesUpdate) AddDestinyPictures(d ...*DestinyPictures) *DestiniesUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return du.AddDestinyPictureIDs(ids...)
+}
+
 // Mutation returns the DestiniesMutation object of the builder.
 func (du *DestiniesUpdate) Mutation() *DestiniesMutation {
 	return du.mutation
@@ -165,6 +181,27 @@ func (du *DestiniesUpdate) RemoveTestimonies(t ...*Testimonies) *DestiniesUpdate
 		ids[i] = t[i].ID
 	}
 	return du.RemoveTestimonyIDs(ids...)
+}
+
+// ClearDestinyPictures clears all "destiny_pictures" edges to the DestinyPictures entity.
+func (du *DestiniesUpdate) ClearDestinyPictures() *DestiniesUpdate {
+	du.mutation.ClearDestinyPictures()
+	return du
+}
+
+// RemoveDestinyPictureIDs removes the "destiny_pictures" edge to DestinyPictures entities by IDs.
+func (du *DestiniesUpdate) RemoveDestinyPictureIDs(ids ...int) *DestiniesUpdate {
+	du.mutation.RemoveDestinyPictureIDs(ids...)
+	return du
+}
+
+// RemoveDestinyPictures removes "destiny_pictures" edges to DestinyPictures entities.
+func (du *DestiniesUpdate) RemoveDestinyPictures(d ...*DestinyPictures) *DestiniesUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return du.RemoveDestinyPictureIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -278,6 +315,51 @@ func (du *DestiniesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if du.mutation.DestinyPicturesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.DestinyPicturesTable,
+			Columns: []string{destinies.DestinyPicturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinypictures.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.RemovedDestinyPicturesIDs(); len(nodes) > 0 && !du.mutation.DestinyPicturesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.DestinyPicturesTable,
+			Columns: []string{destinies.DestinyPicturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinypictures.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.DestinyPicturesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.DestinyPicturesTable,
+			Columns: []string{destinies.DestinyPicturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinypictures.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -417,6 +499,21 @@ func (duo *DestiniesUpdateOne) AddTestimonies(t ...*Testimonies) *DestiniesUpdat
 	return duo.AddTestimonyIDs(ids...)
 }
 
+// AddDestinyPictureIDs adds the "destiny_pictures" edge to the DestinyPictures entity by IDs.
+func (duo *DestiniesUpdateOne) AddDestinyPictureIDs(ids ...int) *DestiniesUpdateOne {
+	duo.mutation.AddDestinyPictureIDs(ids...)
+	return duo
+}
+
+// AddDestinyPictures adds the "destiny_pictures" edges to the DestinyPictures entity.
+func (duo *DestiniesUpdateOne) AddDestinyPictures(d ...*DestinyPictures) *DestiniesUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return duo.AddDestinyPictureIDs(ids...)
+}
+
 // Mutation returns the DestiniesMutation object of the builder.
 func (duo *DestiniesUpdateOne) Mutation() *DestiniesMutation {
 	return duo.mutation
@@ -441,6 +538,27 @@ func (duo *DestiniesUpdateOne) RemoveTestimonies(t ...*Testimonies) *DestiniesUp
 		ids[i] = t[i].ID
 	}
 	return duo.RemoveTestimonyIDs(ids...)
+}
+
+// ClearDestinyPictures clears all "destiny_pictures" edges to the DestinyPictures entity.
+func (duo *DestiniesUpdateOne) ClearDestinyPictures() *DestiniesUpdateOne {
+	duo.mutation.ClearDestinyPictures()
+	return duo
+}
+
+// RemoveDestinyPictureIDs removes the "destiny_pictures" edge to DestinyPictures entities by IDs.
+func (duo *DestiniesUpdateOne) RemoveDestinyPictureIDs(ids ...int) *DestiniesUpdateOne {
+	duo.mutation.RemoveDestinyPictureIDs(ids...)
+	return duo
+}
+
+// RemoveDestinyPictures removes "destiny_pictures" edges to DestinyPictures entities.
+func (duo *DestiniesUpdateOne) RemoveDestinyPictures(d ...*DestinyPictures) *DestiniesUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return duo.RemoveDestinyPictureIDs(ids...)
 }
 
 // Where appends a list predicates to the DestiniesUpdate builder.
@@ -584,6 +702,51 @@ func (duo *DestiniesUpdateOne) sqlSave(ctx context.Context) (_node *Destinies, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(testimonies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if duo.mutation.DestinyPicturesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.DestinyPicturesTable,
+			Columns: []string{destinies.DestinyPicturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinypictures.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.RemovedDestinyPicturesIDs(); len(nodes) > 0 && !duo.mutation.DestinyPicturesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.DestinyPicturesTable,
+			Columns: []string{destinies.DestinyPicturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinypictures.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.DestinyPicturesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   destinies.DestinyPicturesTable,
+			Columns: []string{destinies.DestinyPicturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(destinypictures.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

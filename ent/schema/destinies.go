@@ -33,6 +33,7 @@ func (Destinies) Fields() []ent.Field {
 func (Destinies) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("testimonies", Testimonies.Type),
+		edge.To("destiny_pictures", DestinyPictures.Type),
 	}
 }
 

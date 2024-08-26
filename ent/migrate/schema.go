@@ -24,6 +24,29 @@ var (
 		Columns:    DestiniesColumns,
 		PrimaryKey: []*schema.Column{DestiniesColumns[0]},
 	}
+	// DestinyPicturesColumns holds the columns for the "destiny_pictures" table.
+	DestinyPicturesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "picture", Type: field.TypeString},
+		{Name: "path", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "destiny_id", Type: field.TypeInt},
+	}
+	// DestinyPicturesTable holds the schema information for the "destiny_pictures" table.
+	DestinyPicturesTable = &schema.Table{
+		Name:       "destiny_pictures",
+		Columns:    DestinyPicturesColumns,
+		PrimaryKey: []*schema.Column{DestinyPicturesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "destiny_pictures_destinies_destiny_pictures",
+				Columns:    []*schema.Column{DestinyPicturesColumns[5]},
+				RefColumns: []*schema.Column{DestiniesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// TestimoniesColumns holds the columns for the "testimonies" table.
 	TestimoniesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -68,11 +91,13 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DestiniesTable,
+		DestinyPicturesTable,
 		TestimoniesTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	DestinyPicturesTable.ForeignKeys[0].RefTable = DestiniesTable
 	TestimoniesTable.ForeignKeys[0].RefTable = DestiniesTable
 }

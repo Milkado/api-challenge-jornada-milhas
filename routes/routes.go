@@ -46,9 +46,7 @@ func routes(echo *echo.Echo) {
 	auth.POST("/destinies", controllers.StoreDestinies)      //TODO: Function and test
 	auth.PATCH("/destinies/:id", controllers.ChangeDestiny)  //TODO: Function and test
 	auth.DELETE("/destinies/:id", controllers.DeleteDestiny) //TODO: Function and test
+	auth.POST("/destinies/:id/store-picture", controllers.StoreDestinyPicture)
+	auth.POST("/destinies/:id/store-many-pictures", controllers.StoreManyDestinyPictures)
 
 }
-
-// func placeHolderEcho(c echo.Context) error {
-// 	return c.String(http.StatusOK, "Hello, World!")
-// }

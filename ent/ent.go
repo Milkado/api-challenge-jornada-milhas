@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinypictures"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/users"
 )
@@ -75,9 +76,10 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			destinies.Table:   destinies.ValidColumn,
-			testimonies.Table: testimonies.ValidColumn,
-			users.Table:       users.ValidColumn,
+			destinies.Table:       destinies.ValidColumn,
+			destinypictures.Table: destinypictures.ValidColumn,
+			testimonies.Table:     testimonies.ValidColumn,
+			users.Table:           users.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

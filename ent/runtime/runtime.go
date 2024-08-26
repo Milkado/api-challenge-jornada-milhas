@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinies"
+	"github.com/Milkado/api-challenge-jornada-milhas/ent/destinypictures"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/schema"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/testimonies"
 	"github.com/Milkado/api-challenge-jornada-milhas/ent/users"
@@ -17,6 +18,7 @@ import (
 func init() {
 	destiniesHooks := schema.Destinies{}.Hooks()
 	destinies.Hooks[0] = destiniesHooks[0]
+	destinies.Hooks[1] = destiniesHooks[1]
 	destiniesFields := schema.Destinies{}.Fields()
 	_ = destiniesFields
 	// destiniesDescMeta is the schema descriptor for meta field.
@@ -31,6 +33,16 @@ func init() {
 	destiniesDescUpdatedAt := destiniesFields[5].Descriptor()
 	// destinies.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	destinies.DefaultUpdatedAt = destiniesDescUpdatedAt.Default.(func() time.Time)
+	destinypicturesFields := schema.DestinyPictures{}.Fields()
+	_ = destinypicturesFields
+	// destinypicturesDescCreatedAt is the schema descriptor for created_at field.
+	destinypicturesDescCreatedAt := destinypicturesFields[3].Descriptor()
+	// destinypictures.DefaultCreatedAt holds the default value on creation for the created_at field.
+	destinypictures.DefaultCreatedAt = destinypicturesDescCreatedAt.Default.(func() time.Time)
+	// destinypicturesDescUpdatedAt is the schema descriptor for updated_at field.
+	destinypicturesDescUpdatedAt := destinypicturesFields[4].Descriptor()
+	// destinypictures.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	destinypictures.DefaultUpdatedAt = destinypicturesDescUpdatedAt.Default.(func() time.Time)
 	testimoniesHooks := schema.Testimonies{}.Hooks()
 	testimonies.Hooks[0] = testimoniesHooks[0]
 	testimoniesFields := schema.Testimonies{}.Fields()

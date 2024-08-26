@@ -9,6 +9,9 @@ import (
 // Destinies is the predicate function for destinies builders.
 type Destinies func(*sql.Selector)
 
+// DestinyPictures is the predicate function for destinypictures builders.
+type DestinyPictures func(*sql.Selector)
+
 // Testimonies is the predicate function for testimonies builders.
 type Testimonies func(*sql.Selector)
 
