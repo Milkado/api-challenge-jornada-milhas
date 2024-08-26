@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 
@@ -238,25 +238,28 @@ func StoreManyDestinyPictures(c echo.Context) error {
 				}
 			}
 		} else {
-			if err := c.Request().ParseMultipartForm(10 << 20); err != nil { // 10MB max memory
-				return c.JSON(http.StatusBadRequest, map[string]string{"error": "failed to parse multipart form"})
+			var files []*multipart.FileHeader
+			form, fErr := c.MultipartForm()
+			if fErr != nil {
+				return c.JSON(http.StatusBadRequest, []string{fErr.Error(), "no file"})
+			}
+			for _, fileHeaders := range form.File {
+				files = append(files, fileHeaders...)
 			}
 
-			// Get the file headers
-			formFileHeaders := c.Request().MultipartForm
-			files := formFileHeaders.File["file"]
 			if len(files) == 0 {
-				fmt.Println(files)
 				return c.JSON(http.StatusBadRequest, map[string]string{"error": "no files provided"})
 			}
 
 			for _, fileHeader := range files {
 				fileName, err := storeFormPicture(fileHeader, c, path)
+
 				if err != nil {
 					return c.JSON(http.StatusBadRequest, []string{err.Error(), fileName})
 				}
 
 				_, err = client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(path).Save(ctx)
+
 				if err != nil {
 					return c.JSON(http.StatusBadRequest, err)
 				}
