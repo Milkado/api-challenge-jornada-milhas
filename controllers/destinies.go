@@ -29,7 +29,7 @@ type (
 )
 
 var (
-	path = "/public/pictures/destinies/"
+	destinyPath = "/public/pictures/destinies/"
 )
 
 func IndexDestinies(c echo.Context) error {
@@ -181,7 +181,7 @@ func StoreDestinyPicture(c echo.Context) error {
 			}
 
 			base64File := p.Picture
-			fileName, err = storeBase64Picture(base64File, c, path)
+			fileName, err = storeBase64Picture(base64File, c, destinyPath)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, []string{err.Error(), fileName})
 			}
@@ -190,13 +190,13 @@ func StoreDestinyPicture(c echo.Context) error {
 			if fErr != nil {
 				return c.JSON(http.StatusBadRequest, []string{fErr.Error(), "no file"})
 			}
-			fileName, err = storeFormPicture(file, c, path)
+			fileName, err = storeFormPicture(file, c, destinyPath)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, []string{err.Error(), fileName})
 			}
 		}
 
-		newPicture, err := client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(path).Save(ctx)
+		newPicture, err := client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(destinyPath).Save(ctx)
 
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err)
@@ -227,11 +227,11 @@ func StoreManyDestinyPictures(c echo.Context) error {
 		if p.File != nil {
 			for _, picture := range p.File {
 				base64File := picture
-				fileName, err := storeBase64Picture(base64File, c, path)
+				fileName, err := storeBase64Picture(base64File, c, destinyPath)
 				if err != nil {
 					return c.JSON(http.StatusBadRequest, []string{err.Error(), fileName})
 				}
-				_, err = client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(path).Save(ctx)
+				_, err = client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(destinyPath).Save(ctx)
 
 				if err != nil {
 					return c.JSON(http.StatusBadRequest, []string{err.Error(), fileName})
@@ -252,13 +252,13 @@ func StoreManyDestinyPictures(c echo.Context) error {
 			}
 
 			for _, fileHeader := range files {
-				fileName, err := storeFormPicture(fileHeader, c, path)
+				fileName, err := storeFormPicture(fileHeader, c, destinyPath)
 
 				if err != nil {
 					return c.JSON(http.StatusBadRequest, []string{err.Error(), fileName})
 				}
 
-				_, err = client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(path).Save(ctx)
+				_, err = client.DestinyPictures.Create().SetDestinyID(destinyID).SetPicture(fileName).SetPath(destinyPath).Save(ctx)
 
 				if err != nil {
 					return c.JSON(http.StatusBadRequest, err)

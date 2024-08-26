@@ -35,6 +35,7 @@ func routes(echo *echo.Echo) {
 	open.POST("/depoimentos", controllers.StoreTestimony)
 	auth.PATCH("/depoimentos/:id", controllers.ChangeTestimony)  
 	auth.DELETE("/depoimentos/:id", controllers.DeleteTestimony)
+	open.POST("/depoimentos/:id/store-picture", controllers.StoreTestimonyPicture)
 	
 	//User
 	open.POST("/request-new-password", controllers.RequestNewPassword)
