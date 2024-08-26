@@ -27,6 +27,10 @@ type (
 	}
 )
 
+var (
+	testimonyPath = "/public/pictures/testimonies/"
+)
+
 func IndexTestimonies(c echo.Context) error {
 	client := database.ConnectDB()
 	defer client.Close()
@@ -136,6 +140,54 @@ func DeleteTestimony(c echo.Context) error {
 		return c.JSON(http.StatusOK, "Deleted")
 	}); err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	return nil
+}
+
+func StoreTestimonyPicture(c echo.Context) error {
+	client := database.ConnectDB()
+	defer client.Close()
+
+	if err := withTx(ctx, client, func(tx *ent.Tx) error {
+		p := new(Picture)
+		if bindErr := c.Bind(p); bindErr != nil {
+			return c.JSON(http.StatusBadRequest, bindErr)
+		}
+
+		id := idToInt(c, c.Param("id"))
+
+		var fileName string
+		var err error
+		if p.Picture != "" {
+			if validateErr := helpers.Validate(p, c); validateErr != nil {
+				return c.JSON(http.StatusBadRequest, validateErr)
+			}
+
+			base64File := p.Picture
+			fileName, err = storeBase64Picture(base64File, c, testimonyPath)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, []string{err.Error(), fileName})
+			}
+		} else {
+			file, fErr := c.FormFile("picture")
+			if fErr != nil {
+				return c.JSON(http.StatusBadRequest, []string{fErr.Error(), "no file"})
+			}
+			fileName, err = storeFormPicture(file, c, testimonyPath)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, []string{err.Error(), fileName})
+			}
+		}
+
+		updateTestimony, err := client.Testimonies.UpdateOneID(id).SetPicture(fileName).Save(ctx)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		return c.JSON(http.StatusOK, updateTestimony)
+	}); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
