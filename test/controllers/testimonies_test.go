@@ -31,7 +31,7 @@ var id string
 
 func TestCreateTestimony(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/api/depoimentos", strings.NewReader(testimonyJson))
+	req := httptest.NewRequest(http.MethodPost, "/api/testimonies", strings.NewReader(testimonyJson))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -46,7 +46,7 @@ func TestCreateTestimony(t *testing.T) {
 
 func TestShowTestimony(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/api/depoimentos/:id", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/testimonies/:id", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -74,7 +74,7 @@ func TestShowTestimony(t *testing.T) {
 
 func TestUpdateTestimony(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPatch, "/api/depoimentos/:id", strings.NewReader(testimonyUpdate))
+	req := httptest.NewRequest(http.MethodPatch, "/api/testimonies/:id", strings.NewReader(testimonyUpdate))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -114,7 +114,7 @@ func TestUpdateTestimony(t *testing.T) {
 
 func TestDeleteTestimony(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodDelete, "/api/depoimentos/:id", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/api/testimonies/:id", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)

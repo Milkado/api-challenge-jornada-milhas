@@ -30,12 +30,12 @@ func routes(echo *echo.Echo) {
 	open.POST("/login", controllers.Login)
 
 	//Depoimentos
-	open.GET("/depoimentos", controllers.IndexTestimonies)
-	open.GET("/depoimentos/:id", controllers.ShowTestimony)
-	open.POST("/depoimentos", controllers.StoreTestimony)
-	auth.PATCH("/depoimentos/:id", controllers.ChangeTestimony)  
-	auth.DELETE("/depoimentos/:id", controllers.DeleteTestimony)
-	open.POST("/depoimentos/:id/store-picture", controllers.StoreTestimonyPicture)
+	open.GET("/testimonies", controllers.IndexTestimonies)
+	open.GET("/testimonies/:id", controllers.ShowTestimony)
+	open.POST("/testimonies", controllers.StoreTestimony)
+	auth.PATCH("/testimonies/:id", controllers.ChangeTestimony)  
+	auth.DELETE("/testimonies/:id", controllers.DeleteTestimony)
+	open.POST("/testimonies/:id/store-picture", controllers.StoreTestimonyPicture)
 	
 	//User
 	open.POST("/request-new-password", controllers.RequestNewPassword)
